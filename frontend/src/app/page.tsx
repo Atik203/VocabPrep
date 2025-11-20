@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <div className="space-y-12 pb-12">
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/10 to-primary/5 p-8 md:p-12">
+      <section className="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary/10 via-purple-500/10 to-primary/5 p-8 md:p-12">
         <div className="relative z-10 max-w-3xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-background/80 px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
             <Sparkles className="h-4 w-4 text-primary" />
@@ -161,7 +161,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-purple-600 p-8 text-center text-primary-foreground md:p-12">
+      <section className="relative overflow-hidden rounded-2xl bg-linear-to-r from-primary to-purple-600 p-8 text-center text-primary-foreground md:p-12">
         <div className="relative z-10">
           <BookOpen className="mx-auto mb-4 h-12 w-12" />
           <h2 className="mb-4 text-3xl font-bold md:text-4xl">

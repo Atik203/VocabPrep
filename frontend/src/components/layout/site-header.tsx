@@ -1,5 +1,6 @@
 "use client";
 
+import { UserDropdown } from "@/components/layout/user-dropdown";
 import { ModeToggle } from "@/components/theme/mode-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useAppSelector } from "@/redux/hooks";
 import { motion } from "framer-motion";
 import { BookMarked, BookOpen, Home, Menu, Plus } from "lucide-react";
 import Link from "next/link";
@@ -18,13 +20,13 @@ import { useState, type JSX } from "react";
 const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Words", href: "/words", icon: BookMarked },
-  { name: "Add Word", href: "/add-word", icon: Plus },
   { name: "Practice", href: "/practice", icon: BookOpen },
 ];
 
 export function SiteHeader(): JSX.Element {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   return (
     <motion.header
@@ -80,11 +82,17 @@ export function SiteHeader(): JSX.Element {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2">
-          <Link href="/login" className="hidden md:inline-flex">
-            <Button variant="default" size="sm" className="cursor-pointer">
-              Login
-            </Button>
-          </Link>
+          {!isAuthenticated ? (
+            <Link href="/login" className="hidden md:inline-flex">
+              <Button variant="default" size="sm" className="cursor-pointer">
+                Login
+              </Button>
+            </Link>
+          ) : (
+            <div className="hidden md:flex">
+              <UserDropdown />
+            </div>
+          )}
           <ModeToggle />
 
           {/* Mobile Menu */}
@@ -119,6 +127,13 @@ export function SiteHeader(): JSX.Element {
                     </Link>
                   );
                 })}
+                {!isAuthenticated && (
+                  <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <Button variant="default" className="w-full cursor-pointer">
+                      Login
+                    </Button>
+                  </Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>

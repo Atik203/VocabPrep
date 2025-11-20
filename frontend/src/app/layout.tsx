@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { StoreProvider } from "@/redux/provider";
 import type { Metadata } from "next";
@@ -32,15 +33,17 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <StoreProvider>
           <ThemeProvider>
-            <div className="flex min-h-screen flex-col">
-              <SiteHeader />
-              <main className="flex-1">
-                <div className="container mx-auto max-w-7xl px-4 py-8 lg:px-8">
-                  {children}
-                </div>
-              </main>
-              <SiteFooter />
-            </div>
+            <AuthProvider>
+              <div className="flex min-h-screen flex-col">
+                <SiteHeader />
+                <main className="flex-1">
+                  <div className="container mx-auto max-w-7xl px-4 py-8 lg:px-8">
+                    {children}
+                  </div>
+                </main>
+                <SiteFooter />
+              </div>
+            </AuthProvider>
           </ThemeProvider>
         </StoreProvider>
       </body>

@@ -1,5 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { baseApi } from "./baseApi";
+import { authApi } from "./features/auth/authApi";
+import authReducer from "./features/auth/authSlice";
 import { practiceReducer } from "./features/practice/practiceSlice";
 import { tenseReducer } from "./features/tense/tenseSlice";
 import { vocabularyReducer } from "./features/vocabulary/vocabularySlice";
@@ -8,6 +10,8 @@ export const makeStore = () =>
   configureStore({
     reducer: {
       [baseApi.reducerPath]: baseApi.reducer,
+      [authApi.reducerPath]: authApi.reducer,
+      auth: authReducer,
       vocabulary: vocabularyReducer,
       practice: practiceReducer,
       tense: tenseReducer,
@@ -15,7 +19,7 @@ export const makeStore = () =>
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         serializableCheck: false,
-      }).concat(baseApi.middleware),
+      }).concat(baseApi.middleware, authApi.middleware),
   });
 
 export type AppStore = ReturnType<typeof makeStore>;
