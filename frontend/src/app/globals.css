@@ -216,6 +216,14 @@
     @apply rounded-xl;
   }
 
+  /* Solid background for dropdowns */
+  [role="menu"],
+  [role="listbox"],
+  [data-radix-popper-content-wrapper] > * {
+    background: hsl(var(--popover)) !important;
+    backdrop-filter: none !important;
+  }
+
   .glass-header {
     background: var(--card);
     backdrop-filter: blur(16px);

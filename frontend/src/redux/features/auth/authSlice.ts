@@ -30,7 +30,6 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
         document.cookie = "token=; path=/; max-age=0";
       }
     },

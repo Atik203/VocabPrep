@@ -29,8 +29,7 @@ export default function LoginPage() {
 
     try {
       const result = await login(formData).unwrap();
-      // Store token in localStorage and cookie
-      localStorage.setItem("token", result.data.token);
+      // Store token in cookie only
       document.cookie = `token=${result.data.token}; path=/; max-age=${
         60 * 60 * 24 * 7
       }; SameSite=Lax`;

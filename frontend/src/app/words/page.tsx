@@ -151,40 +151,40 @@ export default function WordsPage() {
       </div>
 
       {/* Filters */}
-      <Card className="glass-card mb-8 border-2 shadow-xl">
+      <Card className="glass-card mb-8 border-2 shadow-xl bg-linear-to-br from-violet-500/5 via-purple-500/5 to-pink-500/5 border-violet-500/20">
         <CardContent className="pt-6">
           <div className="grid gap-4 md:grid-cols-4">
             <div className="md:col-span-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-violet-500" />
                 <Input
                   placeholder="Search words..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-11 h-12 text-lg"
+                  className="pl-11 h-12 text-lg border-violet-500/20 focus:border-violet-500 focus:ring-violet-500"
                 />
               </div>
             </div>
             <Select value={difficulty} onValueChange={setDifficulty}>
-              <SelectTrigger className="h-12">
+              <SelectTrigger className="h-12 border-violet-500/20 focus:border-violet-500 focus:ring-violet-500">
                 <SelectValue placeholder="All Difficulties" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value=" ">All Difficulties</SelectItem>
-                <SelectItem value="easy">Easy</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="hard">Hard</SelectItem>
+                <SelectItem value="easy">✨ Easy</SelectItem>
+                <SelectItem value="medium">🔥 Medium</SelectItem>
+                <SelectItem value="hard">💪 Hard</SelectItem>
               </SelectContent>
             </Select>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="h-12">
+              <SelectTrigger className="h-12 border-violet-500/20 focus:border-violet-500 focus:ring-violet-500">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value=" ">All Status</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="learning">Learning</SelectItem>
-                <SelectItem value="learned">Learned</SelectItem>
+                <SelectItem value="new">🆕 New</SelectItem>
+                <SelectItem value="learning">📚 Learning</SelectItem>
+                <SelectItem value="learned">✅ Learned</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -194,8 +194,8 @@ export default function WordsPage() {
       {/* Letter Filter */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <Filter className="h-5 w-5" />
+          <h2 className="text-xl font-semibold flex items-center gap-2 bg-linear-to-r from-violet-500 to-purple-500 bg-clip-text text-transparent">
+            <Filter className="h-5 w-5 text-violet-500" />
             Filter by Letter
           </h2>
           {selectedLetter && (
@@ -264,69 +264,92 @@ export default function WordsPage() {
           {/* Compact Words Grid */}
           <FadeIn>
             <StaggerContainer className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {paginatedWords.map((word: VocabularyWord, index) => (
-                <StaggerItem key={word._id} index={index}>
-                  <Link href={`/words/${word._id}`}>
-                    <Card className="glass-card cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border h-full group">
-                      <CardContent className="p-4">
-                        {/* Compact Header */}
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-bold truncate group-hover:text-violet-500 transition-colors">
-                              {word.word}
-                            </h3>
-                            {word.phonetic && (
-                              <p className="text-xs text-muted-foreground font-mono truncate">
-                                {word.phonetic}
-                              </p>
+              {paginatedWords.map((word: VocabularyWord, index) => {
+                // Assign gradient colors based on difficulty
+                const gradientColors = {
+                  easy: "from-emerald-500/10 via-green-500/10 to-teal-500/10 border-emerald-500/30 hover:border-emerald-500/60",
+                  medium:
+                    "from-amber-500/10 via-orange-500/10 to-yellow-500/10 border-amber-500/30 hover:border-amber-500/60",
+                  hard: "from-rose-500/10 via-pink-500/10 to-red-500/10 border-rose-500/30 hover:border-rose-500/60",
+                };
+                const gradientClass =
+                  gradientColors[
+                    word.difficulty as keyof typeof gradientColors
+                  ] ||
+                  "from-violet-500/10 via-purple-500/10 to-pink-500/10 border-violet-500/30 hover:border-violet-500/60";
+
+                return (
+                  <StaggerItem key={word._id} index={index}>
+                    <Link href={`/words/${word._id}`}>
+                      <Card
+                        className={`glass-card cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-${
+                          word.difficulty === "easy"
+                            ? "emerald"
+                            : word.difficulty === "hard"
+                            ? "rose"
+                            : "amber"
+                        }-500/20 hover:scale-[1.03] border-2 h-full group bg-linear-to-br ${gradientClass}`}
+                      >
+                        <CardContent className="p-4">
+                          {/* Compact Header */}
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-lg font-bold truncate transition-colors bg-linear-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                                {word.word}
+                              </h3>
+                              {word.phonetic && (
+                                <p className="text-xs text-muted-foreground font-mono truncate">
+                                  {word.phonetic}
+                                </p>
+                              )}
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-violet-500 transition-colors shrink-0" />
+                          </div>
+
+                          {/* Meaning - Compact */}
+                          <p className="text-sm text-foreground/90 line-clamp-2 mb-3">
+                            {word.meaning}
+                          </p>
+
+                          {/* Badges Row */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {word.partOfSpeech && (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] h-5 px-1.5 bg-violet-500/10 border-violet-500/40"
+                              >
+                                {word.partOfSpeech}
+                              </Badge>
+                            )}
+                            <Badge
+                              className={`${getDifficultyColor(
+                                word.difficulty
+                              )} border text-[10px] h-5 px-1.5 font-semibold`}
+                            >
+                              {word.difficulty}
+                            </Badge>
+                            <Badge
+                              className={`${getStatusColor(
+                                word.status
+                              )} border text-[10px] h-5 px-1.5 font-semibold`}
+                            >
+                              {word.status}
+                            </Badge>
+                            {word.examTags && word.examTags.length > 0 && (
+                              <Badge
+                                variant="secondary"
+                                className="text-[10px] h-5 px-1.5 bg-blue-500/20 border-blue-500/40 text-blue-400"
+                              >
+                                {word.examTags[0]}
+                              </Badge>
                             )}
                           </div>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-violet-500 transition-colors shrink-0" />
-                        </div>
-
-                        {/* Meaning - Compact */}
-                        <p className="text-sm text-foreground/80 line-clamp-2 mb-2">
-                          {word.meaning}
-                        </p>
-
-                        {/* Badges Row */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {word.partOfSpeech && (
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] h-5 px-1.5"
-                            >
-                              {word.partOfSpeech}
-                            </Badge>
-                          )}
-                          <Badge
-                            className={`${getDifficultyColor(
-                              word.difficulty
-                            )} border text-[10px] h-5 px-1.5`}
-                          >
-                            {word.difficulty}
-                          </Badge>
-                          <Badge
-                            className={`${getStatusColor(
-                              word.status
-                            )} border text-[10px] h-5 px-1.5`}
-                          >
-                            {word.status}
-                          </Badge>
-                          {word.examTags && word.examTags.length > 0 && (
-                            <Badge
-                              variant="secondary"
-                              className="text-[10px] h-5 px-1.5"
-                            >
-                              {word.examTags[0]}
-                            </Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </StaggerItem>
-              ))}
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </StaggerItem>
+                );
+              })}
             </StaggerContainer>
           </FadeIn>
 

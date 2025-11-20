@@ -20,8 +20,7 @@ export default function AuthCallbackPage() {
     }
 
     if (token) {
-      // Store token in localStorage and cookie
-      localStorage.setItem("token", token);
+      // Store token in cookie only
       document.cookie = `token=${token}; path=/; max-age=${
         60 * 60 * 24 * 7
       }; SameSite=Lax`;

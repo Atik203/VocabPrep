@@ -10,13 +10,21 @@ import { useEffect } from "react";
 // Routes that don't require authentication
 const publicRoutes = ["/", "/login", "/register", "/auth", "/words"];
 
+// Helper function to get cookie
+function getCookie(name: string): string | null {
+  if (typeof window === "undefined") return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+  return null;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();
 
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const token = typeof window !== "undefined" ? getCookie("token") : null;
 
   // Only fetch user data if token exists
   const { data, isSuccess, isError, isLoading } = useGetMeQuery(undefined, {
@@ -34,7 +42,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isError && token) {
       // Token is invalid or expired
       dispatch(logout());
-      localStorage.removeItem("token");
 
       // Redirect to login if on protected route
       const isPublicRoute = publicRoutes.some((route) =>
