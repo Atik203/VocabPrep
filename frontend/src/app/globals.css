@@ -132,11 +132,17 @@
     @apply border-border;
   }
 
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-geist-sans), system-ui, -apple-system,
       BlinkMacSystemFont, "Segoe UI", sans-serif;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
@@ -158,6 +164,39 @@
 
   h3 {
     @apply text-2xl lg:text-3xl;
+  }
+
+  /* iOS-style smooth interactions */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    @apply transition-colors duration-200;
+  }
+
+  button:not(:disabled),
+  a:not([aria-disabled="true"]) {
+    @apply cursor-pointer;
+  }
+
+  button:disabled,
+  a[aria-disabled="true"] {
+    @apply cursor-not-allowed opacity-50;
+  }
+
+  /* Remove tap highlight on mobile */
+  button,
+  a,
+  input {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* Custom selection colors */
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
   }
 }
 
@@ -200,11 +239,85 @@
 
   /* Hover Effects with Glass Morphism */
   .card-hover {
-    @apply transition-all duration-300;
+    @apply cursor-pointer transition-all duration-300 ease-out;
   }
 
   .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 48px 0 var(--primary);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 12px 48px 0 oklch(from var(--primary) l c h / 0.3);
+  }
+
+  .card-hover:active {
+    transform: translateY(-2px) scale(0.99);
+  }
+
+  /* iOS-style button interactions */
+  .btn-ios {
+    @apply cursor-pointer select-none transition-all duration-150 active:scale-95;
+  }
+
+  /* Interactive elements */
+  .interactive {
+    @apply cursor-pointer select-none transition-transform duration-150 active:scale-98;
+  }
+
+  /* Smooth fade animation */
+  .fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Pulse animation for loading states */
+  .pulse-subtle {
+    animation: pulseSubtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulseSubtle {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      oklch(from var(--foreground) l c h / 0.05),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
   }
 }

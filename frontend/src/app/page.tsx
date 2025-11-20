@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export default function Home(): JSX.Element {
+export default function Home() {
   return (
     <div className="space-y-12 pb-12">
       {/* Hero Section */}

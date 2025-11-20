@@ -9,10 +9,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { motion } from "framer-motion";
 import { BookMarked, BookOpen, Home, Menu, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { JSX } from "react";
+import { useState, type JSX } from "react";
 
 const navigation = [
   { name: "Home", href: "/", icon: Home },
@@ -23,18 +24,28 @@ const navigation = [
 
 export function SiteHeader(): JSX.Element {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full nav-glass">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
+    <motion.header
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
+    >
+      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center space-x-2 font-bold text-xl tracking-tight group"
+          className="flex items-center space-x-2 font-bold text-xl tracking-tight group cursor-pointer"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl glass-card transition-all duration-300 group-hover:scale-110">
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex h-10 w-10 items-center justify-center rounded-xl glass-card"
+          >
             <BookOpen className="h-5 w-5 text-primary" />
-          </div>
+          </motion.div>
           <span className="gradient-text hidden sm:inline-block">
             EnglishPrep
           </span>
@@ -42,20 +53,27 @@ export function SiteHeader(): JSX.Element {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
-          {navigation.map((item) => {
+          {navigation.map((item, index) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
             return (
-              <Link key={item.href} href={item.href}>
-                <Button
-                  variant={isActive ? "default" : "ghost"}
-                  size="sm"
-                  className="gap-2"
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.name}
-                </Button>
-              </Link>
+              <motion.div
+                key={item.href}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Link href={item.href}>
+                  <Button
+                    variant={isActive ? "default" : "ghost"}
+                    size="sm"
+                    className="gap-2 cursor-pointer"
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.name}
+                  </Button>
+                </Link>
+              </motion.div>
             );
           })}
         </nav>
@@ -65,9 +83,9 @@ export function SiteHeader(): JSX.Element {
           <ModeToggle />
 
           {/* Mobile Menu */}
-          <Sheet>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="cursor-pointer">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
@@ -81,10 +99,14 @@ export function SiteHeader(): JSX.Element {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
                   return (
-                    <Link key={item.href} href={item.href}>
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                    >
                       <Button
                         variant={isActive ? "default" : "ghost"}
-                        className="w-full justify-start gap-2"
+                        className="w-full justify-start gap-2 cursor-pointer"
                       >
                         <Icon className="h-4 w-4" />
                         {item.name}
@@ -97,6 +119,6 @@ export function SiteHeader(): JSX.Element {
           </Sheet>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }

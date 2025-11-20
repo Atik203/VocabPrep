@@ -28,14 +28,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <StoreProvider>
           <ThemeProvider>
-            <div className="flex min-h-screen flex-col bg-background">
+            <div className="flex min-h-screen flex-col">
               <SiteHeader />
-              <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-10">
-                {children}
+              <main className="flex-1">
+                <div className="container mx-auto max-w-7xl px-4 py-8 lg:px-8">
+                  {children}
+                </div>
               </main>
               <SiteFooter />
             </div>
