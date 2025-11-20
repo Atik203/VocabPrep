@@ -30,7 +30,6 @@ export interface VocabularyDto {
   exampleSentence?: string;
   synonyms: string[];
   antonyms: string[];
-  examTags: string[];
   difficulty: "easy" | "medium" | "hard";
   status: "new" | "learning" | "learned";
   notes?: string;
@@ -66,7 +65,6 @@ export interface CreateVocabularyPayload {
   exampleSentence?: string;
   synonyms?: string[];
   antonyms?: string[];
-  examTags?: string[];
   difficulty?: "easy" | "medium" | "hard";
   status?: "new" | "learning" | "learned";
   notes?: string;

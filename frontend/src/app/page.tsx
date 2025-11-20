@@ -29,13 +29,12 @@ export default function Home() {
             <span>Powered by Free Dictionary API</span>
           </div>
           <h1 className="mb-4 text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
-            Master English for{" "}
-            <span className="gradient-text">IELTS, TOEFL & GRE</span>
+            Master <span className="gradient-text">English Vocabulary</span>
           </h1>
           <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-            Build your vocabulary, practice daily, and track your progress with
-            our comprehensive English prep platform. Complete with pronunciation
-            guides, examples, and smart learning tools.
+            Build your vocabulary, practice with interactive exercises, and
+            track your progress. Complete with pronunciation guides, meanings,
+            examples, and smart learning tools.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button asChild size="lg" className="gap-2">

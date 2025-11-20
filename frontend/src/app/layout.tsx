@@ -18,9 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EnglishPrep | Personal IELTS · TOEFL · GRE Coach",
+  title: "VocabPrep | Master English Vocabulary",
   description:
-    "Track vocabulary, log practice sessions, and review tense references for Phase 1 of the EnglishPrep project.",
+    "Build your English vocabulary with interactive flashcards, quizzes, and practice sessions. Perfect for learners at all levels.",
 };
 
 export default function RootLayout({

@@ -1,11 +1,6 @@
 import { z } from "zod";
-import type { Difficulty, ExamTag, LearningStatus } from "./vocab.model";
+import type { Difficulty, LearningStatus } from "./vocab.model";
 
-const examEnum: readonly [ExamTag, ExamTag, ExamTag] = [
-  "IELTS",
-  "TOEFL",
-  "GRE",
-];
 const difficultyEnum: readonly [Difficulty, Difficulty, Difficulty] = [
   "easy",
   "medium",
@@ -28,7 +23,6 @@ export const createVocabularySchema = z.object({
   exampleSentence: z.string().trim().optional(),
   synonyms: z.array(z.string().trim()).max(10).optional().default([]),
   antonyms: z.array(z.string().trim()).max(10).optional().default([]),
-  examTags: z.array(z.enum(examEnum)).min(1).max(3).default(["IELTS"]),
   difficulty: z.enum(difficultyEnum).default("medium"),
   status: z.enum(statusEnum).default("new"),
   notes: z.string().trim().optional(),
@@ -37,7 +31,6 @@ export const createVocabularySchema = z.object({
 export const updateVocabularySchema = createVocabularySchema.partial();
 
 export const filterVocabularySchema = z.object({
-  exam: z.enum(examEnum).optional(),
   difficulty: z.enum(difficultyEnum).optional(),
   status: z.enum(statusEnum).optional(),
   search: z.string().trim().optional(),

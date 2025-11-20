@@ -1,218 +1,317 @@
-# EnglishPrep English – Personal IELTS / TOEFL / GRE Prep Platform
+# VocabPrep – Master English Vocabulary
 
-A simple, focused web application to help with personal English preparation for **IELTS, TOEFL, and GRE**.
+A modern, focused web application to help you **build and master English vocabulary** through interactive learning, practice sessions, and progress tracking.
 
-Phase 1 focuses on:
+## ✨ Key Features
 
-- Vocabulary tracking
-- meaning
-- Synonyms and antonyms
-- Meaning in Bengali
-- Example sentences
-- Part of speech for each word
-- Sentence-building practice
-- Grammar notes
-- Tense usage examples
-- Sentence patterns
-- Practice log entries
--
-
-No login or user accounts initially – just fast, personal usage.
+- 📚 **Vocabulary Management** - Add, edit, and organize words with meanings, synonyms, antonyms
+- 🇧🇩 **Bengali Support** - Includes Bengali meanings for better understanding
+- 🎯 **Smart Practice Modes** - Flashcards, quizzes, and sentence practice
+- 📊 **Progress Tracking** - Track your learning journey with stats and achievements
+- 🔊 **Audio Pronunciation** - Learn correct pronunciation with audio support
+- 🎨 **Modern UI** - Beautiful glass-morphism design with dark mode support
+- 🔐 **Google OAuth** - Secure authentication with Google Sign-In
+- 🌐 **Public Vocabulary** - Browse words without login, full features when authenticated
 
 ---
 
-## 1. Project Goals
+## 🎯 Project Goals
 
-- Centralize all personal English prep (IELTS / TOEFL / GRE) in one place.
-- Make it easy to:
-  - Save and revise new vocabulary.
-  - Log practice questions and mistakes.
-  - Review tenses and practice forming correct sentences.
-- Start **simple** (Phase 1: no auth, minimal UI, core features only).
-- Keep the architecture ready for future expansion (auth, spaced repetition, analytics).
+- Build a comprehensive vocabulary learning platform focused on mastering English words
+- Provide interactive and engaging practice methods (flashcards, quizzes, sentences)
+- Track progress and celebrate learning milestones
+- Make vocabulary learning accessible and fun
+- Support learners at all levels with difficulty-based categorization
 
 ---
 
-## 2. Tech Stack
+## 🛠️ Tech Stack
 
-### Backend
+### Frontend
 
-- **Node.js** + **Express.js**
-- **MongoDB** + **Mongoose**
-- RESTful APIs for:
-
-  - Vocabulary
-  - Practice log
-  - Tenses & sentence patterns (Phase 1 static / semi-static)
-
-- vercel deploy ready
-
-### Frontend (planned)
-
-- Likely: **Next.js 16.0.3 + React 19 + TypeScript** .
+- **Next.js 16.0.3** with App Router
+- **React 19** + **TypeScript**
+- **Redux Toolkit** with RTK Query for state management
+- **Tailwind CSS v4** for styling
+- **shadcn/ui** + **Radix UI** components
+- **Framer Motion** for animations
+- **Google OAuth** for authentication
 
 ### Backend
 
 - **Node.js** + **Express.js** + **TypeScript**
 - **MongoDB** + **Mongoose 8.20.0**
-
----
-
-Phase 1 focuses on a **small, shippable MVP**:
-
-- Vocabulary tracking with filters
-- Meanings (including Bengali meaning)
-- Synonyms and antonyms
-- Example sentences
-- Part of speech for each word
-- Tense usage examples (read-only reference)
-- Practice log entries for questions & mistakes
-
-No login or user accounts in Phase 1 – just fast, personal usage.
-word
-
-## 2. Tech Stack
-
-### Backend (Phase 1)
-
-- **Node.js** + **Express.js** + **TypeScript**
-- **MongoDB** + **Mongoose 8.20.0**
+- **Passport.js** for Google OAuth
+- **Zod** for validation
 - RESTful APIs for:
-  - Vocabulary
-  - Practice log
-  - Tense reference (Phase 1: static / semi-static)
-- Deployment target: Vercel / Render / Railway (any Node-friendly host)
+  - Vocabulary CRUD operations
+  - User authentication
+  - Progress tracking
+  - Practice sessions
 
-### Frontend (Phase 1)
+### Deployment
 
-- Likely: **Next.js 16.0.3 + React 19 + TypeScript**
-- Very minimal UI:
-  - Vocab list + create/edit form + simple filters
-  - Practice log list + create form
-  - Read-only tense reference page
-
-## 3. High-Level Architecture (Phase 1)
-
-- **Express API server**
-  - Handles CRUD operations for vocab and practice entries.
-  - Serves read-only tense reference data (from static JSON).
-- **MongoDB**
-  - Persists data for a single personal user (no auth in Phase 1).
-- **Frontend client**
-  - Makes API calls to backend and renders a minimal UI.
+- **Backend**: Vercel-ready deployment
+- **Database**: MongoDB Atlas
+- **Authentication**: Cookie-based sessions with Google OAuth
 
 ---
 
-## 4. Phase 1 Functional Modules
+## 🏗️ Architecture
 
-### 4.1 Vocabulary Module
+### Backend API Structure
 
-Add new words with fields:
+- **Express Server**
+  - Handles all CRUD operations for vocabulary
+  - User authentication with Google OAuth
+  - Progress tracking and statistics
+  - Cookie-based session management
 
-- `word`
-- `meaning`
-- `meaningBn` (Bengali meaning)
-- `exampleSentence`
-- `synonyms` (array of strings)
-- `antonyms` (array of strings)
-- `examTags` (e.g., `["IELTS", "TOEFL"]`)
-- `difficulty` (e.g., `easy` | `medium` | `hard`)
-- `status` (`new` | `learning` | `learned`)
+### Frontend Architecture
 
-List all words with filters:
-
-- By exam: IELTS / TOEFL / GRE
-- By difficulty
-- By status (e.g., show only `new` or `learning`)
-
-Allow:
-
-- Edit or delete words
-- Mark word as `learned` / `learning`
-
-Example use cases:
-
-- “Add new GRE vocab and later filter only GRE + hard.”
-- “Show only IELTS words I am still learning.”
-
-### 4.2 Practice Log (Questions & Mistakes)
-
-Create practice entries for:
-
-- Reading
-- Listening
-- Writing
-- Speaking
-
-Each practice entry stores:
-
-- `exam` (IELTS / TOEFL / GRE)
-- `skill` (`reading` / `listening` / `writing` / `speaking`)
-- `prompt` (question or topic)
-- `yourAnswer`
-- `feedbackOrNotes` (what was wrong, what to improve)
-- `createdAt` timestamp
-
-List all practice entries with filters:
-
-- By exam
-- By skill
-- By date (recent first)
-
-Use it as a mistake log to avoid repeating the same errors.
-
-### 4.3 Tense Review (Reference)
-
-Simple tenses reference data:
-
-- Present, Past, Future
-- Simple, Continuous, Perfect, Perfect Continuous
-
-Each tense entry:
-
-- `name` (e.g., `Present Perfect`)
-- `structure` (e.g., `have/has + V3`)
-- `usage` (when to use)
-- `examples`
-
-Implementation in Phase 1:
-
-- Hard-coded JSON file in backend
-- `GET /api/tenses` returns all tenses
-- Frontend shows read-only table/cards
-
-Personal notes or custom examples can be a Phase 2+ feature.
+- **Next.js App Router** for routing and server components
+- **Redux Toolkit** for global state management
+- **RTK Query** for API calls and caching
+- **Client-side rendering** for interactive components
+- **Server-side authentication** via middleware
 
 ---
 
-## 5. Future Phases
+## 📋 Core Features
 
-### Phase 2 – Enhancements (Optional / Future)
+### 1. Vocabulary Management 📚
 
-JWT-based sessions.
+**Add new words with comprehensive details:**
 
-### Phase 3 – Auth, Spaced Repetition & Advanced Features
+- `word` - The English word
+- `meaning` - Definition in English
+- `meaningBn` - Bengali translation
+- `partOfSpeech` - Noun, verb, adjective, etc.
+- `phonetic` - Phonetic notation
+- `phoneticAudio` - Audio pronunciation URL
+- `exampleSentence` - Usage example
+- `synonyms` - Related words with similar meaning
+- `antonyms` - Words with opposite meaning
+- `difficulty` - `easy` | `medium` | `hard`
+- `status` - `new` | `learning` | `learned`
+- `notes` - Personal learning notes
 
-Allow multiple users (if you ever share this app).
+**Smart Filtering:**
 
-Spaced Repetition
+- Filter by difficulty level (easy, medium, hard)
+- Filter by learning status (new, learning, learned)
+- Search by word or meaning
+- Sort and organize your vocabulary
 
-Add review schedule fields to vocab.
+**Word Management:**
 
-Automatically suggest which words to review today.
+- Edit or delete existing words
+- Mark words as learning or learned
+- Track progress for each word
+- View detailed word information with pronunciation
 
-Progress Dashboard
+### 2. Interactive Practice Modes 🎯
 
-Charts and stats:
+**Flashcard Mode:**
+- Show word with definition
+- Click to reveal or hide details
+- Navigate through vocabulary deck
+- Audio pronunciation playback
 
-Words learned over time.
+**Quiz Mode:**
+- Type the correct word for a given meaning
+- Instant feedback on correctness
+- Score tracking during session
+- Review incorrect answers
 
-Practice sessions per week.
+**Sentence Practice:**
+- Write original sentences using new words
+- Practice contextual usage
+- Build writing skills
+- Understand word application in context
 
-Exam-specific modes
+### 3. Progress Tracking 📊
 
-IELTS writing task templates.
+**Statistics Dashboard:**
+- Total words in your vocabulary
+- Number of learned words
+- Learning progress percentage
+- Words added per day average
+- Days active on platform
 
-TOEFL integrated speaking structure hints.
+**Achievements System:**
+- 🎖️ First Word - Added your first vocabulary word
+- ⚡ Quick Learner - Added 10 words in one day
+- 🏆 Vocabulary Master - Reached 100 words
+- 🔥 Consistent Learner - 7-day learning streak
 
-GRE vocab lists integration.
+**Learned Words Gallery:**
+- Visual display of mastered vocabulary
+- Difficulty-based color coding
+- Quick access to word details
+- Track your learning journey
+
+### 4. User Authentication 🔐
+
+**Google OAuth Integration:**
+- Secure sign-in with Google account
+- Profile management
+- Personalized learning experience
+- Progress saved to your account
+
+**Public Access:**
+- Browse vocabulary without login
+- View word details publicly
+- Full features available after authentication
+- Edit and track progress when logged in
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- MongoDB Atlas account or local MongoDB
+- Google OAuth credentials
+
+### Backend Setup
+
+1. Navigate to the backend directory:
+```bash
+cd backend
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Create `.env` file with required variables:
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+DB_NAME=VocabPrep
+JWT_SECRET=your_jwt_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
+CLIENT_URL=http://localhost:3000
+```
+
+4. Start the development server:
+```bash
+npm run dev
+```
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+```bash
+cd frontend
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Create `.env.local` file:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
+
+4. Start the development server:
+```bash
+npm run dev
+```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+---
+
+## 📁 Project Structure
+
+```
+EnglishPrep/
+├── backend/
+│   ├── src/
+│   │   ├── config/         # Configuration files
+│   │   ├── middlewares/    # Express middlewares
+│   │   ├── modules/        # Feature modules
+│   │   │   ├── auth/       # Authentication
+│   │   │   ├── vocabulary/ # Vocabulary CRUD
+│   │   │   └── practice/   # Practice sessions
+│   │   ├── routes/         # API routes
+│   │   └── utils/          # Utility functions
+│   └── api/
+│       └── index.ts        # Vercel serverless entry
+├── frontend/
+│   ├── src/
+│   │   ├── app/            # Next.js app router pages
+│   │   ├── components/     # React components
+│   │   ├── redux/          # Redux store & slices
+│   │   └── lib/            # Utilities & helpers
+│   └── public/             # Static assets
+└── README.md
+```
+
+---
+
+## 🎨 Design System
+
+VocabPrep uses a modern design system with:
+
+- **Glass Morphism** - Frosted glass effect for cards
+- **Gradient Accents** - Colorful gradients for visual appeal
+- **Dark Mode** - Full dark mode support
+- **Animations** - Smooth transitions with Framer Motion
+- **Responsive Design** - Mobile-first approach
+- **Accessibility** - WCAG compliant components
+
+---
+
+## 🔮 Future Enhancements
+
+### Planned Features
+
+- **Spaced Repetition** - Smart review scheduling based on forgetting curve
+- **Word of the Day** - Daily vocabulary challenges
+- **Learning Streaks** - Track consecutive days of learning
+- **Export/Import** - Backup and restore vocabulary data
+- **Mobile App** - Native mobile application
+- **Collaborative Learning** - Share and learn with friends
+- **Advanced Analytics** - Detailed learning insights
+- **Custom Categories** - Create personalized word collections
+- **API Integration** - Connect with external dictionary APIs
+- **Offline Mode** - Practice without internet connection
+
+---
+
+## 📄 License
+
+This project is open source and available under the MIT License.
+
+---
+
+## 👨‍💻 Developer
+
+**Atikur Rahman**
+- GitHub: [@Atik203](https://github.com/atik203)
+- Email: atik.cse1.1.2021@gmail.com
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
+
+---
+
+## ⭐ Show Your Support
+
+Give a ⭐️ if this project helped you learn English vocabulary!
+
+---
+
+Built with ❤️ for English learners

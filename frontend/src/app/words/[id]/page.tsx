@@ -49,7 +49,6 @@ interface VocabularyWord {
   exampleSentence?: string;
   synonyms: string[];
   antonyms: string[];
-  examTags: string[];
   difficulty: string;
   status: string;
   notes?: string;
@@ -496,24 +495,6 @@ export default function WordDetailsPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <Label className="text-xs">Exam Tag</Label>
-                    <Select
-                      value={editForm.examTags?.[0]}
-                      onValueChange={(value) =>
-                        setEditForm({ ...editForm, examTags: [value] })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="IELTS">IELTS</SelectItem>
-                        <SelectItem value="TOEFL">TOEFL</SelectItem>
-                        <SelectItem value="GRE">GRE</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </>
               ) : (
                 <>
@@ -548,10 +529,6 @@ export default function WordDetailsPage() {
                     >
                       {word.difficulty}
                     </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Exam:</span>
-                    <Badge variant="outline">{word.examTags[0]}</Badge>
                   </div>
                 </>
               )}

@@ -39,7 +39,6 @@ interface VocabularyWord {
   exampleSentence?: string;
   synonyms: string[];
   antonyms: string[];
-  examTags: string[];
   difficulty: string;
   status: string;
 }
@@ -335,14 +334,6 @@ export default function WordsPage() {
                             >
                               {word.status}
                             </Badge>
-                            {word.examTags && word.examTags.length > 0 && (
-                              <Badge
-                                variant="secondary"
-                                className="text-[10px] h-5 px-1.5 bg-blue-500/20 border-blue-500/40 text-blue-400"
-                              >
-                                {word.examTags[0]}
-                              </Badge>
-                            )}
                           </div>
                         </CardContent>
                       </Card>

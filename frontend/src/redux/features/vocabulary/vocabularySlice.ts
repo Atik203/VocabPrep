@@ -1,16 +1,13 @@
 import type { CreateVocabularyPayload } from "@/lib/api";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-export const examOptions = ["IELTS", "TOEFL", "GRE"] as const;
 export const difficultyOptions = ["easy", "medium", "hard"] as const;
 export const statusOptions = ["new", "learning", "learned"] as const;
 
-export type ExamOption = (typeof examOptions)[number];
 export type DifficultyOption = (typeof difficultyOptions)[number];
 export type StatusOption = (typeof statusOptions)[number];
 
 export interface VocabularyFilters {
-  exam?: ExamOption;
   difficulty?: DifficultyOption;
   status?: StatusOption;
   search?: string;
@@ -31,7 +28,6 @@ const createInitialForm = (): CreateVocabularyPayload => ({
   exampleSentence: "",
   synonyms: [],
   antonyms: [],
-  examTags: ["IELTS"],
   difficulty: "medium",
   status: "new",
   notes: "",

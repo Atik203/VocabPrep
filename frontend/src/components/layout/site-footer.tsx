@@ -16,11 +16,11 @@ export function SiteFooter(): JSX.Element {
                 <BookOpen className="h-4 w-4 text-white" />
               </div>
               <span className="font-bold text-lg bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                EnglishPrep
+                VocabPrep
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Your companion for IELTS, TOEFL, and GRE preparation
+              Your companion for mastering English vocabulary
             </p>
           </div>
 
@@ -105,7 +105,7 @@ export function SiteFooter(): JSX.Element {
         </div>
 
         <div className="mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>© {currentYear} EnglishPrep. All rights reserved.</p>
+          <p>© {currentYear} VocabPrep. All rights reserved.</p>
           <p>
             Made with <Heart className="inline h-3 w-3 text-red-500" /> by
             <a

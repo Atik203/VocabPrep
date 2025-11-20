@@ -2,7 +2,6 @@ import { Schema, model, type Document } from "mongoose";
 
 export type Difficulty = "easy" | "medium" | "hard";
 export type LearningStatus = "new" | "learning" | "learned";
-export type ExamTag = "IELTS" | "TOEFL" | "GRE";
 
 export interface VocabularyDocument extends Document {
   word: string;
@@ -12,7 +11,6 @@ export interface VocabularyDocument extends Document {
   exampleSentence?: string;
   synonyms: string[];
   antonyms: string[];
-  examTags: ExamTag[];
   difficulty: Difficulty;
   status: LearningStatus;
   notes?: string;
@@ -33,11 +31,6 @@ const vocabularySchema = new Schema<VocabularyDocument>(
     exampleSentence: { type: String, trim: true },
     synonyms: { type: [String], default: [] },
     antonyms: { type: [String], default: [] },
-    examTags: {
-      type: [String],
-      enum: ["IELTS", "TOEFL", "GRE"],
-      default: ["IELTS"],
-    },
     difficulty: {
       type: String,
       enum: ["easy", "medium", "hard"],

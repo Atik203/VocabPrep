@@ -30,10 +30,6 @@ export const listVocabulary = async (
 ): Promise<VocabularyDocument[]> => {
   const query: FilterQuery<VocabularyDocument> = {};
 
-  if (filters.exam) {
-    query.examTags = filters.exam;
-  }
-
   if (filters.difficulty) {
     query.difficulty = filters.difficulty;
   }

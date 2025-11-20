@@ -49,7 +49,7 @@ export function SiteHeader(): JSX.Element {
             <BookOpen className="h-5 w-5 text-primary" />
           </motion.div>
           <span className="gradient-text hidden sm:inline-block">
-            EnglishPrep
+            VocabPrep
           </span>
         </Link>
 
