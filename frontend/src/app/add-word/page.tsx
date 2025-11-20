@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { TopicTagsSelector } from "@/components/ui/topic-tags-selector";
 import { api, type CreateVocabularyPayload } from "@/lib/api";
 import { searchBengaliMeaning } from "@/lib/bengali-dictionary";
 import { fetchWordDefinition } from "@/lib/dictionary";
@@ -51,7 +52,7 @@ export default function AddWordPage() {
     exampleSentence: "",
     synonyms: [],
     antonyms: [],
-    examTags: ["IELTS"],
+    topicTags: [],
     difficulty: "medium",
     status: "new",
     notes: "",
@@ -128,7 +129,7 @@ export default function AddWordPage() {
         exampleSentence: firstDefinition?.example || "",
         synonyms: Array.from(synonymsSet).slice(0, 10),
         antonyms: Array.from(antonymsSet).slice(0, 10),
-        examTags: ["IELTS"],
+        topicTags: [],
         difficulty: "medium",
         status: "new",
         notes: "",
@@ -173,7 +174,7 @@ export default function AddWordPage() {
           exampleSentence: "",
           synonyms: [],
           antonyms: [],
-          examTags: ["IELTS"],
+          topicTags: [],
           difficulty: "medium",
           status: "new",
           notes: "",
@@ -457,24 +458,21 @@ export default function AddWordPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="examTags">Exam Tag</Label>
-                <Select
-                  value={formData.examTags?.[0] || "IELTS"}
-                  onValueChange={(value: "IELTS" | "TOEFL" | "GRE") =>
-                    setFormData({ ...formData, examTags: [value] })
-                  }
-                >
-                  <SelectTrigger id="examTags">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="IELTS">IELTS</SelectItem>
-                    <SelectItem value="TOEFL">TOEFL</SelectItem>
-                    <SelectItem value="GRE">GRE</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            </div>
+
+            {/* Topic Tags */}
+            <div className="space-y-2">
+              <Label htmlFor="topicTags">Topic Tags</Label>
+              <TopicTagsSelector
+                value={formData.topicTags || []}
+                onChange={(tags) =>
+                  setFormData({ ...formData, topicTags: tags })
+                }
+              />
+              <p className="text-xs text-muted-foreground">
+                Select relevant topics from categories like Education, Science &
+                Technology, Business, etc.
+              </p>
             </div>
 
             {/* Notes */}
@@ -521,7 +519,7 @@ export default function AddWordPage() {
                     exampleSentence: "",
                     synonyms: [],
                     antonyms: [],
-                    examTags: ["IELTS"],
+                    topicTags: [],
                     difficulty: "medium",
                     status: "new",
                     notes: "",

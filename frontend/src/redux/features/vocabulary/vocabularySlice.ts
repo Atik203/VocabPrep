@@ -28,6 +28,7 @@ const createInitialForm = (): CreateVocabularyPayload => ({
   exampleSentence: "",
   synonyms: [],
   antonyms: [],
+  topicTags: [],
   difficulty: "medium",
   status: "new",
   notes: "",

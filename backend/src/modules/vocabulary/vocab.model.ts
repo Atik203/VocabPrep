@@ -11,6 +11,7 @@ export interface VocabularyDocument extends Document {
   exampleSentence?: string;
   synonyms: string[];
   antonyms: string[];
+  topicTags: string[];
   difficulty: Difficulty;
   status: LearningStatus;
   notes?: string;
@@ -31,6 +32,7 @@ const vocabularySchema = new Schema<VocabularyDocument>(
     exampleSentence: { type: String, trim: true },
     synonyms: { type: [String], default: [] },
     antonyms: { type: [String], default: [] },
+    topicTags: { type: [String], default: [] },
     difficulty: {
       type: String,
       enum: ["easy", "medium", "hard"],

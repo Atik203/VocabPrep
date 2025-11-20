@@ -7,9 +7,11 @@ import {
 } from "@/components/ui/animations";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useListProgressQuery } from "@/redux/features/progress/progressApi";
 import { useGetVocabularyQuery } from "@/redux/features/vocabulary/vocabularyApi";
 import { useAppSelector } from "@/redux/hooks";
 import {
+  Award,
   BookMarked,
   Brain,
   CheckCircle2,
@@ -17,6 +19,8 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  Trophy,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,6 +31,10 @@ export default function ProgressPage() {
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const user = useAppSelector((state) => state.auth.user);
   const { data: vocabData } = useGetVocabularyQuery();
+  const { data: learnedProgress } = useListProgressQuery(
+    { status: "learned" },
+    { skip: !isAuthenticated }
+  );
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -38,10 +46,12 @@ export default function ProgressPage() {
     return null;
   }
 
-  // Filter learned words
+  // Get learned words by matching progress with vocabulary
   const learnedWords = useMemo(() => {
-    return vocabData?.filter((word) => word.status === "learned") || [];
-  }, [vocabData]);
+    if (!learnedProgress || !vocabData) return [];
+    const learnedVocabIds = new Set(learnedProgress.map((p) => p.vocabularyId));
+    return vocabData.filter((word) => learnedVocabIds.has(word._id));
+  }, [learnedProgress, vocabData]);
 
   const totalWords = vocabData?.length || 0;
   const learnedCount = learnedWords.length;
@@ -89,23 +99,27 @@ export default function ProgressPage() {
   const achievements = [
     {
       title: "First Word",
-      description: "Added your first vocabulary word",
+      description: "Added first word",
+      icon: BookMarked,
       completed: totalWords > 0,
     },
     {
       title: "Quick Learner",
-      description: "Added 10 words in one day",
-      completed: false,
+      description: "10+ words",
+      icon: Zap,
+      completed: totalWords >= 10,
     },
     {
       title: "Vocabulary Master",
-      description: "Reached 100 words",
+      description: "100+ words",
+      icon: Trophy,
       completed: totalWords >= 100,
     },
     {
-      title: "Consistent Learner",
-      description: "7-day learning streak",
-      completed: false,
+      title: "Learning Champion",
+      description: "50+ learned",
+      icon: Award,
+      completed: learnedCount >= 50,
     },
   ];
 
@@ -190,59 +204,6 @@ export default function ProgressPage() {
         </Card>
       </FadeIn>
 
-      {/* Achievements */}
-      <FadeIn delay={0.3}>
-        <Card className="glass-card border-2 bg-linear-to-br from-orange-50/50 to-yellow-50/50 dark:from-orange-950/20 dark:to-yellow-950/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-orange-600" />
-              🏆 Achievements & Milestones
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {achievements.map((achievement, index) => (
-                <div
-                  key={index}
-                  className={`flex items-start gap-4 p-4 rounded-xl border-2 transition-all hover:scale-102 ${
-                    achievement.completed
-                      ? "border-green-300 bg-linear-to-br from-green-50 to-emerald-50 dark:border-green-700 dark:from-green-950/30 dark:to-emerald-950/30 shadow-sm"
-                      : "border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-800/30"
-                  }`}
-                >
-                  <div
-                    className={`mt-0.5 ${
-                      achievement.completed
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    <CheckCircle2
-                      className={`h-7 w-7 ${
-                        achievement.completed ? "fill-current" : ""
-                      }`}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-base">
-                      {achievement.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {achievement.description}
-                    </p>
-                  </div>
-                  {achievement.completed && (
-                    <Badge className="bg-green-600 hover:bg-green-700 text-white">
-                      Unlocked ✓
-                    </Badge>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </FadeIn>
-
       {/* Learned Words List */}
       <FadeIn delay={0.4}>
         <Card className="border-2 bg-linear-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
@@ -322,6 +283,58 @@ export default function ProgressPage() {
                 </div>
               </StaggerContainer>
             )}
+          </CardContent>
+        </Card>
+      </FadeIn>
+
+      {/* Achievements */}
+      <FadeIn delay={0.5}>
+        <Card className="glass-card border-2 bg-linear-to-br from-orange-50/50 to-yellow-50/50 dark:from-orange-950/20 dark:to-yellow-950/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Trophy className="h-5 w-5 text-orange-600" />
+              Achievements
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {achievements.map((achievement, index) => {
+                const Icon = achievement.icon;
+                return (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-xl border-2 transition-all text-center ${
+                      achievement.completed
+                        ? "border-green-300 bg-linear-to-br from-green-50 to-emerald-50 dark:border-green-700 dark:from-green-950/30 dark:to-emerald-950/30"
+                        : "border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-800/30 opacity-60"
+                    }`}
+                  >
+                    <div className="flex justify-center mb-2">
+                      <div
+                        className={`p-3 rounded-full ${
+                          achievement.completed
+                            ? "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400"
+                            : "bg-gray-200 dark:bg-gray-700 text-gray-400"
+                        }`}
+                      >
+                        <Icon className="h-6 w-6" />
+                      </div>
+                    </div>
+                    <h4 className="font-semibold text-sm mb-1">
+                      {achievement.title}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      {achievement.description}
+                    </p>
+                    {achievement.completed && (
+                      <Badge className="mt-2 bg-green-600 text-white text-xs">
+                        ✓
+                      </Badge>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
       </FadeIn>

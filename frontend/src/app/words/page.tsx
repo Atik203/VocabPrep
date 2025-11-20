@@ -16,9 +16,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ALL_TOPIC_TAGS } from "@/lib/topic-tags";
 import { useGetVocabularyQuery } from "@/redux/features/vocabulary/vocabularyApi";
 import {
   BookMarked,
+  ChevronLeft,
   ChevronRight,
   Filter,
   Loader2,
@@ -26,7 +28,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface VocabularyWord {
   _id: string;
@@ -39,21 +41,25 @@ interface VocabularyWord {
   exampleSentence?: string;
   synonyms: string[];
   antonyms: string[];
+  topicTags: string[];
   difficulty: string;
   status: string;
 }
 
 const ITEMS_PER_PAGE = 20;
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const DIFFICULTY_ALL_VALUE = "all-difficulties";
+const STATUS_ALL_VALUE = "all-statuses";
+const TOPIC_ALL_VALUE = "all-topics";
 
 export default function WordsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [difficulty, setDifficulty] = useState<string>("");
   const [status, setStatus] = useState<string>("");
+  const [topicTag, setTopicTag] = useState<string>("");
   const [exam] = useState<string>("");
   const [selectedLetter, setSelectedLetter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
 
   const { data: words, isLoading } = useGetVocabularyQuery({
     search: searchTerm || undefined,
@@ -66,20 +72,26 @@ export default function WordsPage() {
   const filteredWords = useMemo(() => {
     if (!words || words.length === 0) return [];
 
-    let filtered = [...words];
+    const filtered = words.filter((word) => {
+      const trimmedWord = (word.word || "").trim();
+      if (!trimmedWord) return false;
 
-    // Apply letter filter
-    if (selectedLetter) {
-      filtered = filtered.filter(
-        (word) => word.word.charAt(0).toUpperCase() === selectedLetter
-      );
-    }
+      const firstLetter = trimmedWord.charAt(0).toUpperCase();
 
-    // Sort alphabetically
+      if (selectedLetter && firstLetter !== selectedLetter) {
+        return false;
+      }
+
+      if (topicTag && !word.topicTags?.includes(topicTag)) {
+        return false;
+      }
+
+      return true;
+    });
+
     filtered.sort((a, b) => a.word.localeCompare(b.word));
-
     return filtered;
-  }, [words, selectedLetter]);
+  }, [words, selectedLetter, topicTag]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredWords.length / ITEMS_PER_PAGE);
@@ -92,16 +104,18 @@ export default function WordsPage() {
     if (!words || words.length === 0) return {};
     const stats: Record<string, number> = {};
     words.forEach((word: VocabularyWord) => {
-      const letter = word.word.charAt(0).toUpperCase();
+      const trimmedWord = (word.word || "").trim();
+      if (!trimmedWord) return;
+      const letter = trimmedWord.charAt(0).toUpperCase();
       stats[letter] = (stats[letter] || 0) + 1;
     });
     return stats;
   }, [words]);
 
   // Reset to page 1 when filters change
-  useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1);
-  }, [selectedLetter, searchTerm, difficulty, status]);
+  }, [selectedLetter, searchTerm, difficulty, status, topicTag]);
 
   const playAudio = (audioUrl: string) => {
     if (audioUrl) {
@@ -152,7 +166,7 @@ export default function WordsPage() {
       {/* Filters */}
       <Card className="glass-card mb-8 border-2 shadow-xl bg-linear-to-br from-violet-500/5 via-purple-500/5 to-pink-500/5 border-violet-500/20">
         <CardContent className="pt-6">
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-5">
             <div className="md:col-span-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-violet-500" />
@@ -164,26 +178,64 @@ export default function WordsPage() {
                 />
               </div>
             </div>
-            <Select value={difficulty} onValueChange={setDifficulty}>
+            <Select
+              value={difficulty || DIFFICULTY_ALL_VALUE}
+              onValueChange={(value) =>
+                setDifficulty(
+                  value === DIFFICULTY_ALL_VALUE
+                    ? ""
+                    : (value as "easy" | "medium" | "hard")
+                )
+              }
+            >
               <SelectTrigger className="h-12 border-violet-500/20 focus:border-violet-500 focus:ring-violet-500">
                 <SelectValue placeholder="All Difficulties" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value=" ">All Difficulties</SelectItem>
+                <SelectItem value={DIFFICULTY_ALL_VALUE}>
+                  All Difficulties
+                </SelectItem>
                 <SelectItem value="easy">✨ Easy</SelectItem>
                 <SelectItem value="medium">🔥 Medium</SelectItem>
                 <SelectItem value="hard">💪 Hard</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={status} onValueChange={setStatus}>
+            <Select
+              value={status || STATUS_ALL_VALUE}
+              onValueChange={(value) =>
+                setStatus(
+                  value === STATUS_ALL_VALUE
+                    ? ""
+                    : (value as "new" | "learning" | "learned")
+                )
+              }
+            >
               <SelectTrigger className="h-12 border-violet-500/20 focus:border-violet-500 focus:ring-violet-500">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value=" ">All Status</SelectItem>
+                <SelectItem value={STATUS_ALL_VALUE}>All Status</SelectItem>
                 <SelectItem value="new">🆕 New</SelectItem>
                 <SelectItem value="learning">📚 Learning</SelectItem>
                 <SelectItem value="learned">✅ Learned</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={topicTag || TOPIC_ALL_VALUE}
+              onValueChange={(value) =>
+                setTopicTag(value === TOPIC_ALL_VALUE ? "" : value)
+              }
+            >
+              <SelectTrigger className="h-12 border-violet-500/20 focus:border-violet-500 focus:ring-violet-500">
+                <SelectValue placeholder="🏷️ All Topics" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                <SelectItem value={TOPIC_ALL_VALUE}>All Topics</SelectItem>
+                {ALL_TOPIC_TAGS.map((tag) => (
+                  <SelectItem key={tag} value={tag}>
+                    {tag}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -201,7 +253,7 @@ export default function WordsPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setSelectedLetter(null)}
+              onClick={() => setSelectedLetter("")}
               className="text-sm"
             >
               <X className="h-4 w-4 mr-1" />
@@ -220,7 +272,9 @@ export default function WordsPage() {
                 key={letter}
                 variant={isActive ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedLetter(letter)}
+                onClick={() =>
+                  setSelectedLetter((prev) => (prev === letter ? "" : letter))
+                }
                 disabled={count === 0}
                 className={`relative ${isActive ? "shadow-lg" : ""} ${
                   count === 0 ? "opacity-30" : ""
@@ -309,6 +363,29 @@ export default function WordsPage() {
                           <p className="text-sm text-foreground/90 line-clamp-2 mb-3">
                             {word.meaning}
                           </p>
+
+                          {/* Topic Tags */}
+                          {word.topicTags && word.topicTags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {word.topicTags.slice(0, 3).map((tag, idx) => (
+                                <Badge
+                                  key={idx}
+                                  variant="outline"
+                                  className="text-[9px] h-4 px-1 bg-blue-500/10 border-blue-500/30"
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {word.topicTags.length > 3 && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-[9px] h-4 px-1 bg-gray-500/10 border-gray-500/30"
+                                >
+                                  +{word.topicTags.length - 3}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
 
                           {/* Badges Row */}
                           <div className="flex items-center gap-2 flex-wrap">

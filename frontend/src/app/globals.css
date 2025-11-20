@@ -220,8 +220,10 @@
   [role="menu"],
   [role="listbox"],
   [data-radix-popper-content-wrapper] > * {
-    background: hsl(var(--popover)) !important;
-    backdrop-filter: none !important;
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
 
   .glass-header {

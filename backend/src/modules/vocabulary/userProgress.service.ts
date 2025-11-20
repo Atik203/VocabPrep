@@ -46,10 +46,7 @@ export const getUserProgressList = async (
     query.status = status;
   }
 
-  return UserProgressModel.find(query)
-    .populate("vocabularyId")
-    .sort({ updatedAt: -1 })
-    .lean();
+  return UserProgressModel.find(query).sort({ updatedAt: -1 }).lean();
 };
 
 export const deleteUserProgress = async (

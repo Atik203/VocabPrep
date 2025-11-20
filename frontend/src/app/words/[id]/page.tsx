@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { TopicTagsSelector } from "@/components/ui/topic-tags-selector";
 import {
   useGetProgressQuery,
   useUpdateProgressMutation,
@@ -49,6 +50,7 @@ interface VocabularyWord {
   exampleSentence?: string;
   synonyms: string[];
   antonyms: string[];
+  topicTags: string[];
   difficulty: string;
   status: string;
   notes?: string;
@@ -418,6 +420,37 @@ export default function WordDetailsPage() {
                     </p>
                   )}
                 </div>
+              </div>
+
+              {/* Topic Tags */}
+              <div>
+                <Label className="text-sm font-semibold text-muted-foreground mb-2 block">
+                  Topic Tags
+                </Label>
+                {isEditing ? (
+                  <TopicTagsSelector
+                    value={editForm.topicTags || []}
+                    onChange={(tags) =>
+                      setEditForm({ ...editForm, topicTags: tags })
+                    }
+                  />
+                ) : word.topicTags && word.topicTags.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {word.topicTags.map((tag, idx) => (
+                      <Badge
+                        key={idx}
+                        variant="outline"
+                        className="text-sm bg-primary/10 border-primary/30"
+                      >
+                        🏷️ {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">
+                    No topic tags
+                  </p>
+                )}
               </div>
 
               {/* Notes */}

@@ -23,6 +23,7 @@ export const createVocabularySchema = z.object({
   exampleSentence: z.string().trim().optional(),
   synonyms: z.array(z.string().trim()).max(10).optional().default([]),
   antonyms: z.array(z.string().trim()).max(10).optional().default([]),
+  topicTags: z.array(z.string().trim()).max(20).optional().default([]),
   difficulty: z.enum(difficultyEnum).default("medium"),
   status: z.enum(statusEnum).default("new"),
   notes: z.string().trim().optional(),

@@ -41,6 +41,8 @@ export const progressApi = baseApi.injectEndpoints({
         { type: "Progress", id: vocabularyId },
         { type: "Progress", id: "STATS" },
         { type: "Progress", id: "LIST" },
+        { type: "Vocabulary", id: vocabularyId },
+        { type: "Vocabulary", id: "LIST" },
       ],
     }),
     listProgress: builder.query<
