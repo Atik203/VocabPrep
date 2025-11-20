@@ -9,33 +9,39 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { api, type TenseDto } from "@/lib/api";
+import { useGetTensesQuery } from "@/redux/features/tense/tenseApi";
+import { toggleViewMode } from "@/redux/features/tense/tenseSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import type { SerializedError } from "@reduxjs/toolkit";
+import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { JSX } from "react";
-import { useEffect, useState } from "react";
+
+const getErrorMessage = (
+  error?: FetchBaseQueryError | SerializedError
+): string | null => {
+  if (!error) return null;
+  if ("status" in error) {
+    if (typeof error.data === "string" && error.data) return error.data;
+    return `Request failed (${error.status})`;
+  }
+  return error.message ?? "Unexpected error";
+};
 
 export function TensePanel(): JSX.Element {
-  const [tenses, setTenses] = useState<TenseDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const viewMode = useAppSelector((state) => state.tense.viewMode);
+  const {
+    data: tenses = [],
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useGetTensesQuery();
 
-  const load = async (): Promise<void> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await api.tenses.list();
-      setTenses(data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load tense reference"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    void load();
-  }, []);
+  const loading = isLoading || isFetching;
+  const layoutClass =
+    viewMode === "grid" ? "grid gap-4 md:grid-cols-2" : "space-y-4";
+  const errorMessage = getErrorMessage(error);
 
   return (
     <Card>
@@ -47,21 +53,32 @@ export function TensePanel(): JSX.Element {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
             {loading ? "Syncing examples..." : `${tenses.length} tenses ready`}
           </p>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => void load()}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => dispatch(toggleViewMode())}
+            >
+              {viewMode === "grid" ? "List view" : "Grid view"}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={loading}
+            >
+              Refresh
+            </Button>
+          </div>
         </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        <div className="grid gap-4 md:grid-cols-2">
+        {errorMessage && (
+          <p className="text-sm text-destructive">{errorMessage}</p>
+        )}
+        <div className={layoutClass}>
           {tenses.map((tense) => (
             <article
               key={tense.name}

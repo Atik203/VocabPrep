@@ -11,82 +11,88 @@ import {
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { api, type CreatePracticePayload, type PracticeDto } from "@/lib/api";
+import type { CreatePracticePayload, PracticeDto } from "@/lib/api";
+import {
+  useCreatePracticeMutation,
+  useGetPracticesQuery,
+} from "@/redux/features/practice/practiceApi";
+import type {
+  ExamOption as PracticeExamOption,
+  SkillOption as PracticeSkillOption,
+} from "@/redux/features/practice/practiceSlice";
+import {
+  examOptions as practiceExamOptions,
+  resetPracticeForm,
+  skillOptions,
+  updatePracticeForm,
+} from "@/redux/features/practice/practiceSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import type { SerializedError } from "@reduxjs/toolkit";
+import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { JSX } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useMemo } from "react";
 
-const exams = ["IELTS", "TOEFL", "GRE"] as const;
-const skills = ["reading", "listening", "writing", "speaking"] as const;
+const exams = practiceExamOptions;
+const skills = skillOptions;
 
-type Exam = (typeof exams)[number];
-type Skill = (typeof skills)[number];
-
-const initialForm: CreatePracticePayload = {
-  exam: "IELTS",
-  skill: "writing",
-  prompt: "",
-  yourAnswer: "",
-  feedbackOrNotes: "",
+const getErrorMessage = (
+  error?: FetchBaseQueryError | SerializedError
+): string | null => {
+  if (!error) return null;
+  if ("status" in error) {
+    if (typeof error.data === "string" && error.data) return error.data;
+    return `Request failed (${error.status})`;
+  }
+  return error.message ?? "Unexpected error";
 };
 
 export function PracticePanel(): JSX.Element {
-  const [entries, setEntries] = useState<PracticeDto[]>([]);
-  const [form, setForm] = useState<CreatePracticePayload>(initialForm);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const form = useAppSelector((state) => state.practice.form);
 
-  const loadEntries = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await api.practice.list();
-      setEntries(data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch practice log"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const {
+    data: entries = [],
+    isLoading,
+    isFetching,
+    error: queryError,
+    refetch,
+  } = useGetPracticesQuery();
 
-  useEffect(() => {
-    void loadEntries();
-  }, [loadEntries]);
+  const [createPractice, { isLoading: isCreating, error: createError }] =
+    useCreatePracticeMutation();
+
+  const loading = isLoading || isFetching;
+  const submitting = isCreating;
 
   const handleChange = <K extends keyof CreatePracticePayload>(
     key: K,
     value: CreatePracticePayload[K]
   ) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    dispatch(updatePracticeForm({ key, value }));
   };
 
   const handleSubmit = async () => {
     if (!form.prompt) return;
-    setSubmitting(true);
-    setError(null);
     try {
-      await api.practice.create(form);
-      setForm(initialForm);
-      await loadEntries();
+      await createPractice(form).unwrap();
+      dispatch(resetPracticeForm());
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Unable to save practice entry"
-      );
-    } finally {
-      setSubmitting(false);
+      console.error("createPractice failed", err);
     }
   };
 
-  const groupedEntries = entries.reduce<Record<string, PracticeDto[]>>(
-    (acc, entry) => {
-      const key = `${entry.exam}-${entry.skill}`;
-      acc[key] = acc[key] ? [...acc[key], entry] : [entry];
-      return acc;
-    },
-    {}
+  const groupedEntries = useMemo(
+    () =>
+      entries.reduce<Record<string, PracticeDto[]>>((acc, entry) => {
+        const key = `${entry.exam}-${entry.skill}`;
+        acc[key] = acc[key] ? [...acc[key], entry] : [entry];
+        return acc;
+      }, {}),
+    [entries]
   );
+
+  const errorMessage =
+    getErrorMessage(createError) ?? getErrorMessage(queryError);
 
   return (
     <Card>
@@ -105,7 +111,7 @@ export function PracticePanel(): JSX.Element {
               id="practice-exam"
               value={form.exam}
               onChange={(event) =>
-                handleChange("exam", event.target.value as Exam)
+                handleChange("exam", event.target.value as PracticeExamOption)
               }
             >
               {exams.map((option) => (
@@ -121,7 +127,7 @@ export function PracticePanel(): JSX.Element {
               id="practice-skill"
               value={form.skill}
               onChange={(event) =>
-                handleChange("skill", event.target.value as Skill)
+                handleChange("skill", event.target.value as PracticeSkillOption)
               }
             >
               {skills.map((option) => (
@@ -163,11 +169,13 @@ export function PracticePanel(): JSX.Element {
         </div>
         <Button
           disabled={submitting || !form.prompt}
-          onClick={() => void handleSubmit()}
+          onClick={() => handleSubmit()}
         >
           {submitting ? "Saving..." : "Log practice"}
         </Button>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {errorMessage && (
+          <p className="text-sm text-destructive">{errorMessage}</p>
+        )}
 
         <section>
           <header className="mb-4 flex items-center justify-between">
@@ -181,7 +189,7 @@ export function PracticePanel(): JSX.Element {
             </div>
             <Button
               variant="secondary"
-              onClick={() => void loadEntries()}
+              onClick={() => refetch()}
               disabled={loading}
             >
               Refresh

@@ -1,6 +1,7 @@
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { StoreProvider } from "@/redux/provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -29,15 +30,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <ThemeProvider>
-          <div className="flex min-h-screen flex-col bg-background">
-            <SiteHeader />
-            <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-10">
-              {children}
-            </main>
-            <SiteFooter />
-          </div>
-        </ThemeProvider>
+        <StoreProvider>
+          <ThemeProvider>
+            <div className="flex min-h-screen flex-col bg-background">
+              <SiteHeader />
+              <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-10">
+                {children}
+              </main>
+              <SiteFooter />
+            </div>
+          </ThemeProvider>
+        </StoreProvider>
       </body>
     </html>
   );

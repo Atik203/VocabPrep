@@ -13,83 +13,77 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import type { CreateVocabularyPayload } from "@/lib/api";
 import {
-  api,
-  type CreateVocabularyPayload,
-  type VocabularyDto,
-} from "@/lib/api";
+  useCreateVocabularyMutation,
+  useDeleteVocabularyMutation,
+  useGetVocabularyQuery,
+} from "@/redux/features/vocabulary/vocabularyApi";
+import type {
+  DifficultyOption,
+  ExamOption,
+  StatusOption,
+} from "@/redux/features/vocabulary/vocabularySlice";
+import {
+  difficultyOptions,
+  examOptions,
+  resetForm as resetVocabularyForm,
+  setAntonymsText,
+  setFilter,
+  setSearch,
+  setSynonymsText,
+  statusOptions,
+  updateForm as updateVocabularyForm,
+} from "@/redux/features/vocabulary/vocabularySlice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import type { SerializedError } from "@reduxjs/toolkit";
+import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { JSX } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
-const exams = ["IELTS", "TOEFL", "GRE"] as const;
-const difficulties = ["easy", "medium", "hard"] as const;
-const statuses = ["new", "learning", "learned"] as const;
+const exams = examOptions;
+const difficulties = difficultyOptions;
+const statuses = statusOptions;
 
-type Difficulty = (typeof difficulties)[number];
-type Status = (typeof statuses)[number];
-type Exam = (typeof exams)[number];
-
-interface Filters {
-  exam?: Exam;
-  difficulty?: Difficulty;
-  status?: Status;
-  search?: string;
-}
-
-const initialForm: CreateVocabularyPayload = {
-  word: "",
-  meaning: "",
-  meaningBn: "",
-  partOfSpeech: "",
-  exampleSentence: "",
-  synonyms: [],
-  antonyms: [],
-  examTags: ["IELTS"],
-  difficulty: "medium",
-  status: "new",
-  notes: "",
+const getErrorMessage = (
+  error?: FetchBaseQueryError | SerializedError
+): string | null => {
+  if (!error) return null;
+  if ("status" in error) {
+    if (typeof error.data === "string" && error.data) return error.data;
+    return `Request failed (${error.status})`;
+  }
+  return error.message ?? "Unexpected error";
 };
 
 export function VocabularyPanel(): JSX.Element {
-  const [items, setItems] = useState<VocabularyDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Filters>({});
-  const [form, setForm] = useState<CreateVocabularyPayload>(initialForm);
-  const [synonymsText, setSynonymsText] = useState("");
-  const [antonymsText, setAntonymsText] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const dispatch = useAppDispatch();
+  const filters = useAppSelector((state) => state.vocabulary.filters);
+  const form = useAppSelector((state) => state.vocabulary.form);
+  const synonymsText = useAppSelector((state) => state.vocabulary.synonymsText);
+  const antonymsText = useAppSelector((state) => state.vocabulary.antonymsText);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const query: Record<string, string | undefined> = {
-        exam: filters.exam,
-        difficulty: filters.difficulty,
-        status: filters.status,
-        search: filters.search,
-      };
-      const data = await api.vocabulary.list(query);
-      setItems(data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch vocabulary"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
+  const {
+    data: items = [],
+    isLoading,
+    isFetching,
+    error: queryError,
+    refetch,
+  } = useGetVocabularyQuery(filters);
 
-  useEffect(() => {
-    void loadData();
-  }, [loadData]);
+  const [createVocabulary, { isLoading: isCreating, error: createError }] =
+    useCreateVocabularyMutation();
+  const [deleteVocabulary, { isLoading: isDeleting, error: deleteError }] =
+    useDeleteVocabularyMutation();
+
+  const loading = isLoading || isFetching;
+  const submitting = isCreating || isDeleting;
 
   const derivedSynonyms = useMemo(
     () =>
       synonymsText
         .split(",")
-        .map((value) => value.trim())
+        .map((value: string) => value.trim())
         .filter(Boolean),
     [synonymsText]
   );
@@ -98,7 +92,7 @@ export function VocabularyPanel(): JSX.Element {
     () =>
       antonymsText
         .split(",")
-        .map((value) => value.trim())
+        .map((value: string) => value.trim())
         .filter(Boolean),
     [antonymsText]
   );
@@ -107,46 +101,35 @@ export function VocabularyPanel(): JSX.Element {
     key: K,
     value: CreateVocabularyPayload[K]
   ) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    dispatch(updateVocabularyForm({ key, value }));
   };
 
   const handleCreate = async () => {
     if (!form.word || !form.meaning) return;
-    setSubmitting(true);
-    setError(null);
     try {
-      await api.vocabulary.create({
+      await createVocabulary({
         ...form,
         synonyms: derivedSynonyms,
         antonyms: derivedAntonyms,
-      });
-      setForm(initialForm);
-      setSynonymsText("");
-      setAntonymsText("");
-      await loadData();
+      }).unwrap();
+      dispatch(resetVocabularyForm());
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to create vocabulary"
-      );
-    } finally {
-      setSubmitting(false);
+      console.error("createVocabulary failed", err);
     }
   };
 
   const handleDelete = async (id: string) => {
-    setSubmitting(true);
-    setError(null);
     try {
-      await api.vocabulary.remove(id);
-      await loadData();
+      await deleteVocabulary(id).unwrap();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete vocabulary"
-      );
-    } finally {
-      setSubmitting(false);
+      console.error("deleteVocabulary failed", err);
     }
   };
+
+  const errorMessage =
+    getErrorMessage(createError) ??
+    getErrorMessage(deleteError) ??
+    getErrorMessage(queryError);
 
   return (
     <Card>
@@ -165,9 +148,7 @@ export function VocabularyPanel(): JSX.Element {
               id="vocab-search"
               placeholder="E.g. ubiquitous"
               value={filters.search ?? ""}
-              onChange={(event) =>
-                setFilters((prev) => ({ ...prev, search: event.target.value }))
-              }
+              onChange={(event) => dispatch(setSearch(event.target.value))}
             />
           </div>
           <div>
@@ -176,8 +157,13 @@ export function VocabularyPanel(): JSX.Element {
               id="vocab-exam"
               value={filters.exam ?? ""}
               onChange={(event) => {
-                const value = event.target.value as Exam | "";
-                setFilters((prev) => ({ ...prev, exam: value || undefined }));
+                const value = event.target.value as ExamOption | "";
+                dispatch(
+                  setFilter({
+                    key: "exam",
+                    value: (value || undefined) as ExamOption | undefined,
+                  })
+                );
               }}
             >
               <option value="">All Exams</option>
@@ -194,11 +180,13 @@ export function VocabularyPanel(): JSX.Element {
               id="vocab-difficulty"
               value={filters.difficulty ?? ""}
               onChange={(event) => {
-                const value = event.target.value as Difficulty | "";
-                setFilters((prev) => ({
-                  ...prev,
-                  difficulty: value || undefined,
-                }));
+                const value = event.target.value as DifficultyOption | "";
+                dispatch(
+                  setFilter({
+                    key: "difficulty",
+                    value: (value || undefined) as DifficultyOption | undefined,
+                  })
+                );
               }}
             >
               <option value="">Any</option>
@@ -215,8 +203,13 @@ export function VocabularyPanel(): JSX.Element {
               id="vocab-status"
               value={filters.status ?? ""}
               onChange={(event) => {
-                const value = event.target.value as Status | "";
-                setFilters((prev) => ({ ...prev, status: value || undefined }));
+                const value = event.target.value as StatusOption | "";
+                dispatch(
+                  setFilter({
+                    key: "status",
+                    value: (value || undefined) as StatusOption | undefined,
+                  })
+                );
               }}
             >
               <option value="">Any</option>
@@ -292,7 +285,9 @@ export function VocabularyPanel(): JSX.Element {
                 <Input
                   id="synonyms"
                   value={synonymsText}
-                  onChange={(event) => setSynonymsText(event.target.value)}
+                  onChange={(event) =>
+                    dispatch(setSynonymsText(event.target.value))
+                  }
                   placeholder="precise, thorough"
                 />
               </div>
@@ -301,7 +296,9 @@ export function VocabularyPanel(): JSX.Element {
                 <Input
                   id="antonyms"
                   value={antonymsText}
-                  onChange={(event) => setAntonymsText(event.target.value)}
+                  onChange={(event) =>
+                    dispatch(setAntonymsText(event.target.value))
+                  }
                   placeholder="careless"
                 />
               </div>
@@ -316,7 +313,7 @@ export function VocabularyPanel(): JSX.Element {
                   id="examTags"
                   value={form.examTags?.[0] ?? "IELTS"}
                   onChange={(event) =>
-                    handleChange("examTags", [event.target.value as Exam])
+                    handleChange("examTags", [event.target.value as ExamOption])
                   }
                 >
                   {exams.map((exam) => (
@@ -332,7 +329,10 @@ export function VocabularyPanel(): JSX.Element {
                   id="difficulty"
                   value={form.difficulty}
                   onChange={(event) =>
-                    handleChange("difficulty", event.target.value as Difficulty)
+                    handleChange(
+                      "difficulty",
+                      event.target.value as DifficultyOption
+                    )
                   }
                 >
                   {difficulties.map((difficulty) => (
@@ -350,7 +350,7 @@ export function VocabularyPanel(): JSX.Element {
                   id="status"
                   value={form.status}
                   onChange={(event) =>
-                    handleChange("status", event.target.value as Status)
+                    handleChange("status", event.target.value as StatusOption)
                   }
                 >
                   {statuses.map((status) => (
@@ -374,11 +374,13 @@ export function VocabularyPanel(): JSX.Element {
             </div>
             <Button
               disabled={submitting || !form.word || !form.meaning}
-              onClick={() => void handleCreate()}
+              onClick={() => handleCreate()}
             >
               {submitting ? "Saving..." : "Add word"}
             </Button>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {errorMessage && (
+              <p className="text-sm text-destructive">{errorMessage}</p>
+            )}
           </div>
         </section>
 
@@ -394,7 +396,7 @@ export function VocabularyPanel(): JSX.Element {
             </div>
             <Button
               variant="secondary"
-              onClick={() => void loadData()}
+              onClick={() => refetch()}
               disabled={loading}
             >
               Refresh
@@ -438,7 +440,7 @@ export function VocabularyPanel(): JSX.Element {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => void handleDelete(item._id)}
+                    onClick={() => handleDelete(item._id)}
                     disabled={submitting}
                   >
                     Remove
