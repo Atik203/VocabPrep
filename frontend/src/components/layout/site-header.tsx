@@ -80,6 +80,11 @@ export function SiteHeader(): JSX.Element {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2">
+          <Link href="/login" className="hidden md:inline-flex">
+            <Button variant="default" size="sm" className="cursor-pointer">
+              Login
+            </Button>
+          </Link>
           <ModeToggle />
 
           {/* Mobile Menu */}
