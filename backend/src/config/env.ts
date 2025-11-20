@@ -8,7 +8,7 @@ const envSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
   PORT: z.coerce.number().default(4000),
-  MONGODB_URI: z.string({ required_error: "MONGODB_URI is required" }),
+  MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
   DB_NAME: z.string().default("EnglishPrep"),
   API_BASE_PATH: z.string().default("/api/v1"),
 });

@@ -10,6 +10,15 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/bcryptjs": "^3.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.2",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.7",
+    "@types/node": "^20.11.30",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.17",
     "@vercel/node": "^5.5.8",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
@@ -22,21 +31,12 @@
     "morgan": "^1.10.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "typescript": "^5.5.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^3.0.0",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/express-session": "^1.18.2",
     "@types/helmet": "^4.0.0",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/morgan": "^1.9.7",
-    "@types/node": "^20.11.30",
-    "@types/passport": "^1.0.17",
-    "@types/passport-google-oauth20": "^2.0.17",
     "ts-node": "^10.9.2",
-    "tsx": "^4.16.0",
-    "typescript": "^5.5.4"
+    "tsx": "^4.16.0"
   }
 }

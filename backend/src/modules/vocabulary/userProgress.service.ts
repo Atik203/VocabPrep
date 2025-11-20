@@ -5,10 +5,7 @@ import {
   type UserProgressDocument,
 } from "./userProgress.model";
 
-export const getUserProgress = async (
-  userId: string,
-  vocabularyId: string
-) => {
+export const getUserProgress = async (userId: string, vocabularyId: string) => {
   return UserProgressModel.findOne({
     userId,
     vocabularyId,
@@ -81,7 +78,7 @@ export const getUserProgressStats = async (
     learned: 0,
   };
 
-  stats.forEach((stat) => {
+  stats.forEach((stat: { _id: string; count: number }) => {
     const status = stat._id as UserLearningStatus;
     result[status] = stat.count;
     result.total += stat.count;
