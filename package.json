@@ -7,11 +7,11 @@
     "frontend"
   ],
   "scripts": {
-    "dev:backend": "yarn workspace backend dev",
-    "dev:frontend": "yarn workspace frontend dev",
+    "dev:backend": "node api.js && yarn workspace backend dev",
+    "dev:frontend": "node api.js && yarn workspace frontend dev",
     "build:backend": "yarn workspace backend build",
     "build:frontend": "yarn workspace frontend build",
-    "dev": "yarn dev:backend & yarn dev:frontend",
+    "dev": "node api.js && yarn dev:backend & yarn dev:frontend",
     "type-check": "yarn workspace frontend type-check & yarn workspace backend type-check"
   }
 }
