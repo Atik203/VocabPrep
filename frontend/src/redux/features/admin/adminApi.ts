@@ -91,7 +91,7 @@ export const adminApi = baseApi.injectEndpoints({
       }
     >({
       query: (params) => ({
-        url: "/v1/admin/users",
+        url: "/admin/users",
         params,
       }),
       providesTags: ["AdminUsers"],
@@ -99,13 +99,13 @@ export const adminApi = baseApi.injectEndpoints({
 
     // Get system-wide AI statistics
     getAIStats: builder.query<AIStatsResponse, void>({
-      query: () => "/v1/admin/ai-stats",
+      query: () => "/admin/ai-stats",
       providesTags: ["AdminStats"],
     }),
 
     // Get specific user's AI usage
     getUserAIUsage: builder.query<UserAIUsageResponse, string>({
-      query: (userId) => `/v1/admin/users/${userId}/ai-usage`,
+      query: (userId) => `/admin/users/${userId}/ai-usage`,
       providesTags: ["AdminUserUsage"],
     }),
 
@@ -115,7 +115,7 @@ export const adminApi = baseApi.injectEndpoints({
       UpdateSubscriptionRequest
     >({
       query: ({ userId, tier, expiresAt }) => ({
-        url: `/v1/admin/users/${userId}/subscription`,
+        url: `/admin/users/${userId}/subscription`,
         method: "PATCH",
         body: { tier, expiresAt },
       }),

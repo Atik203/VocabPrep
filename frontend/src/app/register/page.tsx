@@ -11,6 +11,7 @@ import { useAppDispatch } from "@/redux/hooks";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -31,12 +32,16 @@ export default function RegisterPage() {
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      const errorMsg = "Passwords do not match";
+      setError(errorMsg);
+      toast.error("Validation Error", { description: errorMsg });
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+      const errorMsg = "Password must be at least 6 characters";
+      setError(errorMsg);
+      toast.error("Validation Error", { description: errorMsg });
       return;
     }
 
@@ -47,18 +52,24 @@ export default function RegisterPage() {
         password: formData.password,
       }).unwrap();
       dispatch(setCredentials(result.data));
+      toast.success("Welcome to VocabPrep!", {
+        description: "Your account has been created successfully.",
+      });
       router.push("/");
     } catch (err) {
       const error = err as { data?: { message?: string } };
-      setError(
-        error?.data?.message || "Registration failed. Please try again."
-      );
+      const errorMessage =
+        error?.data?.message || "Registration failed. Please try again.";
+      setError(errorMessage);
+      toast.error("Registration Failed", {
+        description: errorMessage,
+      });
     }
   };
 
   const handleGoogleSignup = () => {
     const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
     window.location.href = `${apiUrl}/auth/google`;
   };
 

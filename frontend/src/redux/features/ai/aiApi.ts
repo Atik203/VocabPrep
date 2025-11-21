@@ -89,7 +89,7 @@ export const aiApi = baseApi.injectEndpoints({
     // Enhance vocabulary with AI
     enhanceVocab: builder.mutation<EnhanceVocabResponse, EnhanceVocabRequest>({
       query: (data) => ({
-        url: "/v1/ai/enhance-vocab",
+        url: "/ai/enhance-vocab",
         method: "POST",
         body: data,
       }),
@@ -101,7 +101,7 @@ export const aiApi = baseApi.injectEndpoints({
       PracticeFeedbackRequest
     >({
       query: (data) => ({
-        url: "/v1/ai/practice-feedback",
+        url: "/ai/practice-feedback",
         method: "POST",
         body: data,
       }),
@@ -109,13 +109,13 @@ export const aiApi = baseApi.injectEndpoints({
 
     // Get AI usage statistics
     getUsageStats: builder.query<UsageStatsResponse, void>({
-      query: () => "/v1/ai/usage",
+      query: () => "/ai/usage",
       providesTags: ["AIUsage"],
     }),
 
     // Get AI quota (lightweight endpoint)
     getQuota: builder.query<QuotaResponse, void>({
-      query: () => "/v1/ai/quota",
+      query: () => "/ai/quota",
       providesTags: ["AIQuota"],
     }),
   }),

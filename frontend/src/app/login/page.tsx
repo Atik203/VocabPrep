@@ -11,6 +11,7 @@ import { useAppDispatch } from "@/redux/hooks";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,16 +35,24 @@ export default function LoginPage() {
         60 * 60 * 24 * 7
       }; SameSite=Lax`;
       dispatch(setCredentials(result.data));
+      toast.success("Welcome back!", {
+        description: "You have successfully logged in.",
+      });
       router.push("/");
     } catch (err) {
       const error = err as { data?: { message?: string } };
-      setError(error?.data?.message || "Login failed. Please try again.");
+      const errorMessage =
+        error?.data?.message || "Login failed. Please try again.";
+      setError(errorMessage);
+      toast.error("Login Failed", {
+        description: errorMessage,
+      });
     }
   };
 
   const handleGoogleLogin = () => {
     const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
     window.location.href = `${apiUrl}/auth/google`;
   };
 

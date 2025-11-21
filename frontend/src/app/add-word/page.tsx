@@ -152,7 +152,9 @@ export default function AddWordPage() {
 
   const handleSave = async () => {
     if (!formData.word || !formData.meaning) {
-      setSearchError("Word and meaning are required");
+      const errorMsg = "Word and meaning are required";
+      setSearchError(errorMsg);
+      toast.error("Validation Error", { description: errorMsg });
       return;
     }
 
@@ -164,6 +166,9 @@ export default function AddWordPage() {
       await api.vocabulary.create(formData);
       setSaveSuccess(true);
       setDuplicateWarning(null);
+      toast.success("Word Added!", {
+        description: `"${formData.word}" has been added to your vocabulary.`,
+      });
 
       // Reset form after 2 seconds
       setTimeout(() => {
@@ -187,9 +192,12 @@ export default function AddWordPage() {
         setSaveSuccess(false);
       }, 2000);
     } catch (error) {
-      setSearchError(
-        error instanceof Error ? error.message : "Failed to save word"
-      );
+      const errorMsg =
+        error instanceof Error ? error.message : "Failed to save word";
+      setSearchError(errorMsg);
+      toast.error("Failed to Save", {
+        description: errorMsg,
+      });
     } finally {
       setIsSaving(false);
     }

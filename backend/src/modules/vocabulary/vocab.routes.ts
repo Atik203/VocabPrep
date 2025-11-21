@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authenticate } from "../../middlewares/authenticate";
 import {
   checkDuplicateHandler,
   createVocabularyHandler,
@@ -10,11 +11,16 @@ import {
 
 const router = Router();
 
-router.post("/", createVocabularyHandler);
-router.get("/", listVocabularyHandler);
+// Specific routes MUST come before parameterized routes
 router.get("/check-duplicate", checkDuplicateHandler);
+
+// Public routes (no authentication required)
+router.get("/", listVocabularyHandler);
 router.get("/:id", getVocabularyHandler);
-router.patch("/:id", updateVocabularyHandler);
-router.delete("/:id", deleteVocabularyHandler);
+
+// Protected routes (authentication required)
+router.post("/", authenticate, createVocabularyHandler);
+router.patch("/:id", authenticate, updateVocabularyHandler);
+router.delete("/:id", authenticate, deleteVocabularyHandler);
 
 export default router;
