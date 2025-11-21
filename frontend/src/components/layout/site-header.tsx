@@ -130,12 +130,21 @@ export function SiteHeader(): JSX.Element {
               <div className="hidden md:flex">
                 <UserDropdown />
               </div>
+              <div className="flex items-center gap-2 md:hidden">
+                <UserDropdown />
+                <ModeToggle />
+              </div>
             </>
           )}
           {!isAuthenticated && (
-            <div className="hidden md:flex">
-              <ModeToggle />
-            </div>
+            <>
+              <div className="hidden md:flex">
+                <ModeToggle />
+              </div>
+              <div className="flex md:hidden">
+                <ModeToggle />
+              </div>
+            </>
           )}
 
           {/* Mobile Menu */}
@@ -146,11 +155,16 @@ export function SiteHeader(): JSX.Element {
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-64">
-              <SheetHeader>
-                <SheetTitle className="text-left">Menu</SheetTitle>
+            <SheetContent
+              side="right"
+              className="w-72 border-l border-border bg-linear-to-b from-background via-background/95 to-background/90 backdrop-blur-xl px-0"
+            >
+              <SheetHeader className="px-6 pt-6">
+                <SheetTitle className="text-left text-lg font-semibold">
+                  Menu
+                </SheetTitle>
               </SheetHeader>
-              <nav className="mt-6 flex flex-col space-y-2">
+              <nav className="mt-6 flex flex-col space-y-3 px-6 pb-8">
                 {navigation.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
@@ -162,7 +176,11 @@ export function SiteHeader(): JSX.Element {
                     >
                       <Button
                         variant={isActive ? "default" : "ghost"}
-                        className="w-full justify-start gap-2 cursor-pointer"
+                        className={`w-full justify-start gap-3 cursor-pointer text-base transition-colors ${
+                          isActive
+                            ? ""
+                            : "bg-muted/40 hover:bg-muted text-foreground"
+                        }`}
                       >
                         <Icon className="h-4 w-4" />
                         {item.name}
@@ -172,7 +190,10 @@ export function SiteHeader(): JSX.Element {
                 })}
                 {!isAuthenticated && (
                   <Link href="/login" onClick={() => setIsOpen(false)}>
-                    <Button variant="default" className="w-full cursor-pointer">
+                    <Button
+                      variant="default"
+                      className="w-full cursor-pointer bg-linear-to-r from-blue-600 to-purple-600 text-white"
+                    >
                       Login
                     </Button>
                   </Link>
