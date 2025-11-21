@@ -23,15 +23,18 @@ import { TopicTagsSelector } from "@/components/ui/topic-tags-selector";
 import { api, type CreateVocabularyPayload } from "@/lib/api";
 import { searchBengaliMeaning } from "@/lib/bengali-dictionary";
 import { fetchWordDefinition } from "@/lib/dictionary";
+import { useEnhanceVocabMutation } from "@/redux/features/ai/aiApi";
 import {
   AlertCircle,
   CheckCircle2,
   Loader2,
   Plus,
   Search,
+  Sparkles,
   Volume2,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function AddWordPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,6 +43,8 @@ export default function AddWordPage() {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const [enhanceVocab, { isLoading: isEnhancing }] = useEnhanceVocabMutation();
 
   const [formData, setFormData] = useState<CreateVocabularyPayload>({
     word: "",
@@ -197,6 +202,41 @@ export default function AddWordPage() {
     }
   };
 
+  const handleAIEnhancement = async () => {
+    if (!formData.word || !formData.meaning) {
+      toast.error("Word and meaning are required for AI enhancement");
+      return;
+    }
+
+    try {
+      const result = await enhanceVocab({
+        word: formData.word,
+        meaning: formData.meaning,
+        context: "intermediate",
+      }).unwrap();
+
+      // Update form with AI-enhanced data
+      setFormData((prev) => ({
+        ...prev,
+        meaning: result.data.enhancedMeaning || prev.meaning,
+        exampleSentence:
+          result.data.exampleSentences?.[0] || prev.exampleSentence,
+        difficulty: result.data.suggestedDifficulty || prev.difficulty,
+        topicTags: result.data.suggestedTopicTags || prev.topicTags,
+        notes: result.data.memoryTip
+          ? `${prev.notes ? prev.notes + "\n\n" : ""}💡 Memory Tip: ${
+              result.data.memoryTip
+            }`
+          : prev.notes,
+      }));
+
+      toast.success("✨ AI enhancement applied!");
+    } catch (error: any) {
+      const errorMessage = error?.data?.error || "Failed to enhance with AI";
+      toast.error(errorMessage);
+    }
+  };
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <div className="mb-8">
@@ -264,10 +304,29 @@ export default function AddWordPage() {
       {formData.word && (
         <Card className="glass-card">
           <CardHeader>
-            <CardTitle>Word Details</CardTitle>
-            <CardDescription>
-              Edit and customize the word information before saving
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Word Details</CardTitle>
+                <CardDescription>
+                  Edit and customize the word information before saving
+                </CardDescription>
+              </div>
+              <Button
+                onClick={handleAIEnhancement}
+                disabled={isEnhancing || !formData.word || !formData.meaning}
+                variant="outline"
+                className="gap-2 bg-linear-to-r from-violet-500/10 to-purple-500/10 border-violet-500/20 hover:border-violet-500/40"
+              >
+                {isEnhancing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4 text-violet-500" />
+                )}
+                <span className="bg-linear-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent font-semibold">
+                  Enhance with AI
+                </span>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Word and Phonetic */}

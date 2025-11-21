@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useGetPracticeFeedbackMutation } from "@/redux/features/ai/aiApi";
 import { useGetVocabularyQuery } from "@/redux/features/vocabulary/vocabularyApi";
 import {
   BookMarked,
@@ -12,12 +13,14 @@ import {
   CheckCircle2,
   Lightbulb,
   Loader2,
+  MessageSquare,
   RotateCw,
   Sparkles,
   Trophy,
   Volume2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface VocabularyWord {
   _id: string;
@@ -65,8 +68,11 @@ export default function PracticePage() {
   const [userInput, setUserInput] = useState("");
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [practiceWords, setPracticeWords] = useState<VocabularyWord[]>([]);
+  const [aiFeedback, setAiFeedback] = useState<any>(null);
 
   const { data: allWords, isLoading } = useGetVocabularyQuery({});
+  const [getPracticeFeedback, { isLoading: isGettingFeedback }] =
+    useGetPracticeFeedbackMutation();
 
   useEffect(() => {
     if (allWords && allWords.length > 0) {
@@ -80,6 +86,7 @@ export default function PracticePage() {
   const handleNext = () => {
     setShowAnswer(false);
     setUserInput("");
+    setAiFeedback(null);
     if (currentWordIndex < practiceWords.length - 1) {
       setCurrentWordIndex(currentWordIndex + 1);
     } else {
@@ -104,10 +111,33 @@ export default function PracticePage() {
     setCurrentWordIndex(0);
     setShowAnswer(false);
     setUserInput("");
+    setAiFeedback(null);
     setScore({ correct: 0, total: 0 });
     if (allWords && allWords.length > 0) {
       const shuffled = [...allWords].sort(() => Math.random() - 0.5);
       setPracticeWords(shuffled.slice(0, 20));
+    }
+  };
+
+  const handleGetAIFeedback = async () => {
+    if (!userInput.trim() || !currentWord) {
+      toast.error("Please write a sentence first");
+      return;
+    }
+
+    try {
+      const result = await getPracticeFeedback({
+        vocabularyId: currentWord._id,
+        word: currentWord.word,
+        userAnswer: userInput,
+        skill: "writing",
+      }).unwrap();
+
+      setAiFeedback(result.data);
+      toast.success("✨ AI feedback received!");
+    } catch (error: any) {
+      const errorMessage = error?.data?.error || "Failed to get AI feedback";
+      toast.error(errorMessage);
     }
   };
 
@@ -391,6 +421,53 @@ export default function PracticePage() {
                             rows={4}
                             className="max-w-2xl mx-auto mb-4"
                           />
+
+                          {/* AI Feedback Section */}
+                          {aiFeedback && (
+                            <div className="max-w-2xl mx-auto space-y-3 mb-4">
+                              <div
+                                className={`border rounded-lg p-4 text-left ${
+                                  aiFeedback.isCorrect
+                                    ? "bg-green-500/10 border-green-500/30"
+                                    : "bg-blue-500/10 border-blue-500/30"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2 mb-2">
+                                  <MessageSquare className="h-4 w-4 text-violet-500" />
+                                  <p className="text-sm font-semibold text-violet-500">
+                                    AI Feedback
+                                  </p>
+                                  <Badge variant="outline" className="ml-auto">
+                                    Rating: {aiFeedback.rating}/5
+                                  </Badge>
+                                </div>
+                                <p className="text-sm mb-3">
+                                  {aiFeedback.feedback}
+                                </p>
+                                {aiFeedback.suggestions &&
+                                  aiFeedback.suggestions.length > 0 && (
+                                    <div className="mt-3 pt-3 border-t border-violet-500/20">
+                                      <p className="text-xs font-semibold text-violet-500 mb-2">
+                                        Suggestions:
+                                      </p>
+                                      <ul className="text-xs space-y-1">
+                                        {aiFeedback.suggestions.map(
+                                          (suggestion: string, idx: number) => (
+                                            <li key={idx}>• {suggestion}</li>
+                                          )
+                                        )}
+                                      </ul>
+                                    </div>
+                                  )}
+                                {aiFeedback.encouragement && (
+                                  <p className="text-xs mt-3 italic text-muted-foreground">
+                                    💡 {aiFeedback.encouragement}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
                           {currentWord.exampleSentence && showAnswer && (
                             <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 max-w-2xl mx-auto text-left">
                               <p className="text-sm text-green-500 font-semibold mb-1">
@@ -403,14 +480,31 @@ export default function PracticePage() {
                           )}
                         </div>
                         <div className="flex gap-3">
-                          {!showAnswer ? (
-                            <Button
-                              onClick={() => setShowAnswer(true)}
-                              className="flex-1 bg-linear-to-r from-amber-500 to-orange-500"
-                              size="lg"
-                            >
-                              Show Example
-                            </Button>
+                          {!aiFeedback ? (
+                            <>
+                              <Button
+                                onClick={handleGetAIFeedback}
+                                disabled={
+                                  isGettingFeedback || !userInput.trim()
+                                }
+                                className="flex-1 bg-linear-to-r from-violet-500 to-purple-500 gap-2"
+                                size="lg"
+                              >
+                                {isGettingFeedback ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Sparkles className="h-4 w-4" />
+                                )}
+                                Get AI Feedback
+                              </Button>
+                              <Button
+                                onClick={() => setShowAnswer(true)}
+                                variant="outline"
+                                size="lg"
+                              >
+                                Show Example
+                              </Button>
+                            </>
                           ) : (
                             <Button
                               onClick={handleNext}

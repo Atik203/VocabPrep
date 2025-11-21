@@ -3,6 +3,7 @@
 import { UserDropdown } from "@/components/layout/user-dropdown";
 import { ModeToggle } from "@/components/theme/mode-toggle";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
   SheetContent,
@@ -11,8 +12,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAppSelector } from "@/redux/hooks";
+import { useGetQuotaQuery } from "@/redux/features/ai/aiApi";
 import { motion } from "framer-motion";
-import { BookMarked, BookOpen, Home, Menu } from "lucide-react";
+import { BookMarked, BookOpen, Home, Menu, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type JSX } from "react";
@@ -27,6 +29,10 @@ export function SiteHeader(): JSX.Element {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const { data: quotaData } = useGetQuotaQuery(undefined, {
+    skip: !isAuthenticated,
+    pollingInterval: 60000, // Refresh every minute
+  });
 
   return (
     <motion.header
@@ -94,6 +100,25 @@ export function SiteHeader(): JSX.Element {
             </Link>
           ) : (
             <>
+              {/* AI Quota Badge */}
+              {quotaData?.data && (
+                <Link href="/dashboard" className="hidden md:inline-flex">
+                  <Badge
+                    variant="outline"
+                    className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 ${
+                      quotaData.data.remaining < 20
+                        ? "border-red-500 text-red-600"
+                        : quotaData.data.remaining < 50
+                        ? "border-yellow-500 text-yellow-600"
+                        : "border-purple-500 text-purple-600"
+                    }`}
+                  >
+                    <Zap className="h-3.5 w-3.5" />
+                    <span className="font-semibold">{quotaData.data.remaining}</span>
+                    <span className="text-xs text-muted-foreground">/ {quotaData.data.limit}</span>
+                  </Badge>
+                </Link>
+              )}
               <div className="hidden md:flex">
                 <ModeToggle />
               </div>

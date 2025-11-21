@@ -7,6 +7,15 @@ export interface IUser extends Document {
   password?: string;
   googleId?: string;
   avatar?: string;
+  
+  // AI & Subscription fields
+  subscriptionTier: 'free' | 'premium';
+  aiRequestsRemaining: number;
+  aiResetDate: Date;
+  isAdmin: boolean;
+  stripeCustomerId?: string;
+  subscriptionExpiresAt?: Date;
+  
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -37,6 +46,35 @@ const userSchema = new Schema<IUser>(
     },
     avatar: {
       type: String,
+    },
+    
+    // AI & Subscription fields
+    subscriptionTier: {
+      type: String,
+      enum: ['free', 'premium'],
+      default: 'free',
+    },
+    aiRequestsRemaining: {
+      type: Number,
+      default: 100, // Free tier daily limit
+    },
+    aiResetDate: {
+      type: Date,
+      default: () => {
+        const tomorrow = new Date();
+        tomorrow.setUTCHours(24, 0, 0, 0);
+        return tomorrow;
+      },
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    stripeCustomerId: {
+      type: String,
+    },
+    subscriptionExpiresAt: {
+      type: Date,
     },
   },
   {

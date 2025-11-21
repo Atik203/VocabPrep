@@ -27,6 +27,16 @@ export const baseApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Vocabulary", "Practice", "Tense", "Progress"],
+  tagTypes: [
+    "Vocabulary",
+    "Practice",
+    "Tense",
+    "Progress",
+    "AIUsage",
+    "AIQuota",
+    "AdminUsers",
+    "AdminStats",
+    "AdminUserUsage",
+  ],
   endpoints: () => ({}),
 });

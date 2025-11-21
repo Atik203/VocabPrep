@@ -13,6 +13,9 @@ export interface User {
   email: string;
   avatar?: string;
   googleId?: string;
+  isAdmin?: boolean;
+  subscriptionTier?: "free" | "premium";
+  aiRequestsRemaining?: number;
   createdAt: string;
   updatedAt: string;
 }
