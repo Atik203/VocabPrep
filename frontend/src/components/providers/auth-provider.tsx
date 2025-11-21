@@ -2,29 +2,37 @@
 
 import { useGetMeQuery } from "@/redux/features/auth/authApi";
 import { logout, setCredentials } from "@/redux/features/auth/authSlice";
-import { useAppDispatch } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 // Routes that don't require authentication
-const publicRoutes = ["/", "/login", "/register", "/auth", "/words"];
+const publicRoutes = [
+  "/",
+  "/login",
+  "/register",
+  "/auth",
+  "/words",
+  "/pricing",
+];
 
-// Helper function to get cookie
-function getCookie(name: string): string | null {
-  if (typeof window === "undefined") return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
-  return null;
-}
+// Routes that require authentication
+const protectedRoutes = [
+  "/practice",
+  "/progress",
+  "/profile",
+  "/add-word",
+  "/dashboard",
+];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();
 
-  const token = typeof window !== "undefined" ? getCookie("token") : null;
+  // Get token and auth status from Redux state (persisted in localStorage)
+  const { token, isAuthenticated } = useAppSelector((state) => state.auth);
 
   // Only fetch user data if token exists
   const { data, isSuccess, isError, isLoading } = useGetMeQuery(undefined, {
@@ -52,6 +60,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, [isError, token, pathname, router, dispatch]);
+
+  // Redirect to login if accessing protected route without authentication
+  useEffect(() => {
+    const isProtectedRoute = protectedRoutes.some((route) =>
+      pathname.startsWith(route)
+    );
+
+    if (isProtectedRoute && !token && !isLoading) {
+      router.push(`/login?from=${encodeURIComponent(pathname)}`);
+    }
+  }, [pathname, token, isLoading, router]);
 
   // Show loading spinner while checking auth on protected routes
   const isPublicRoute = publicRoutes.some((route) =>

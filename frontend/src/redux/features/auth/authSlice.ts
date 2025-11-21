@@ -29,9 +29,6 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      if (typeof window !== "undefined") {
-        document.cookie = "token=; path=/; max-age=0";
-      }
     },
   },
 });

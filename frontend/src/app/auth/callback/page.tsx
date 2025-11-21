@@ -20,11 +20,6 @@ function AuthCallbackContent() {
     }
 
     if (token) {
-      // Store token in cookie only
-      document.cookie = `token=${token}; path=/; max-age=${
-        60 * 60 * 24 * 7
-      }; SameSite=Lax`;
-
       // Fetch user data
       fetch(
         `${
@@ -39,6 +34,7 @@ function AuthCallbackContent() {
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
+            // Store credentials in Redux (persisted to localStorage)
             dispatch(setCredentials({ user: data.data.user, token }));
             router.push("/");
           } else {

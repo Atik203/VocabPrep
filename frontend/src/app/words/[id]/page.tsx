@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { TopicTagsSelector } from "@/components/ui/topic-tags-selector";
+import { useEnhanceVocabMutation } from "@/redux/features/ai/aiApi";
 import {
   useGetProgressQuery,
   useUpdateProgressMutation,
@@ -31,12 +32,14 @@ import {
   Edit,
   Loader2,
   Save,
+  Sparkles,
   Volume2,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface VocabularyWord {
   _id: string;
@@ -75,6 +78,7 @@ export default function WordDetailsPage() {
   const [updateVocabulary, { isLoading: isSaving }] =
     useUpdateVocabularyMutation();
   const [updateProgress] = useUpdateProgressMutation();
+  const [enhanceVocab, { isLoading: isEnhancing }] = useEnhanceVocabMutation();
 
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,6 +124,65 @@ export default function WordDetailsPage() {
     if (word?.phoneticAudio) {
       const audio = new Audio(word.phoneticAudio);
       audio.play();
+    }
+  };
+
+  const handleAIEnhance = async () => {
+    if (!word) return;
+
+    try {
+      setError(null);
+      toast.info("AI Enhancement", {
+        description: "Enhancing vocabulary with AI...",
+      });
+
+      const result = await enhanceVocab({
+        word: word.word,
+        meaning: word.meaning,
+        context:
+          word.difficulty === "easy"
+            ? "beginner"
+            : word.difficulty === "hard"
+            ? "advanced"
+            : "intermediate",
+      }).unwrap();
+
+      // Update the edit form with AI suggestions
+      setEditForm({
+        ...editForm,
+        meaning: result.data.enhancedMeaning || editForm.meaning,
+        exampleSentence:
+          result.data.exampleSentences?.[0] || editForm.exampleSentence,
+        synonyms: result.data.synonyms?.length
+          ? result.data.synonyms
+          : editForm.synonyms,
+        antonyms: result.data.antonyms?.length
+          ? result.data.antonyms
+          : editForm.antonyms,
+        difficulty: result.data.suggestedDifficulty || editForm.difficulty,
+        topicTags: result.data.suggestedTopicTags?.length
+          ? [
+              ...(editForm.topicTags || []),
+              ...result.data.suggestedTopicTags,
+            ].filter((tag, index, self) => self.indexOf(tag) === index)
+          : editForm.topicTags,
+        notes: result.data.memoryTip
+          ? `${editForm.notes ? editForm.notes + "\n\n" : ""}💡 Memory Tip:\n${
+              result.data.memoryTip
+            }`
+          : editForm.notes,
+      });
+
+      setIsEditing(true);
+      toast.success("AI Enhancement Complete", {
+        description: `Review and save the AI-enhanced content. (${result.quota.remaining} AI requests remaining)`,
+      });
+    } catch (err: any) {
+      const errorMsg = err?.data?.message || "Failed to enhance with AI";
+      setError(errorMsg);
+      toast.error("AI Enhancement Failed", {
+        description: errorMsg,
+      });
     }
   };
 
@@ -180,6 +243,24 @@ export default function WordDetailsPage() {
                 <>
                   <Circle className="h-4 w-4" />
                   Mark as Learned
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={handleAIEnhance}
+              disabled={isEnhancing}
+              variant="secondary"
+              className="gap-2"
+            >
+              {isEnhancing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Enhancing...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  AI Enhance
                 </>
               )}
             </Button>

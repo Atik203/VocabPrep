@@ -30,10 +30,7 @@ export default function LoginPage() {
 
     try {
       const result = await login(formData).unwrap();
-      // Store token in cookie only
-      document.cookie = `token=${result.data.token}; path=/; max-age=${
-        60 * 60 * 24 * 7
-      }; SameSite=Lax`;
+      // Store credentials in Redux (persisted to localStorage)
       dispatch(setCredentials(result.data));
       toast.success("Welcome back!", {
         description: "You have successfully logged in.",

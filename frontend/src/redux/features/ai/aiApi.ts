@@ -19,6 +19,7 @@ interface EnhanceVocabResponse {
     suggestedTopicTags: string[];
     memoryTip: string;
     synonyms: string[];
+    antonyms: string[];
     tokensUsed: number;
   };
   quota: {

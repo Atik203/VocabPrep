@@ -4,8 +4,10 @@ import type {
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { RootState } from "../../store";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
 export interface User {
   _id: string;
@@ -40,7 +42,7 @@ export interface LoginInput {
   password: string;
 }
 
-// Custom base query with token
+// Custom base query with token from Redux state
 const baseQueryWithAuth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -48,8 +50,11 @@ const baseQueryWithAuth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const baseQuery = fetchBaseQuery({
     baseUrl: API_URL,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
+    credentials: "include",
+    prepareHeaders: (headers, { getState }) => {
+      headers.set("Content-Type", "application/json");
+      // Get token from Redux state (persisted in localStorage)
+      const token = (getState() as RootState).auth.token;
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
@@ -71,14 +76,6 @@ export const authApi = createApi({
         method: "POST",
         body: credentials,
       }),
-      async onQueryStarted(_, { queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          localStorage.setItem("token", data.data.token);
-        } catch (error) {
-          console.error("Register failed:", error);
-        }
-      },
     }),
     login: builder.mutation<AuthResponse, LoginInput>({
       query: (credentials) => ({
@@ -86,14 +83,6 @@ export const authApi = createApi({
         method: "POST",
         body: credentials,
       }),
-      async onQueryStarted(_, { queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          localStorage.setItem("token", data.data.token);
-        } catch (error) {
-          console.error("Login failed:", error);
-        }
-      },
     }),
     getMe: builder.query<{ success: boolean; data: { user: User } }, void>({
       query: () => "/auth/me",

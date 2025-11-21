@@ -24,6 +24,7 @@ import { api, type CreateVocabularyPayload } from "@/lib/api";
 import { searchBengaliMeaning } from "@/lib/bengali-dictionary";
 import { fetchWordDefinition } from "@/lib/dictionary";
 import { useEnhanceVocabMutation } from "@/redux/features/ai/aiApi";
+import { useCreateVocabularyMutation } from "@/redux/features/vocabulary/vocabularyApi";
 import {
   AlertCircle,
   CheckCircle2,
@@ -39,12 +40,13 @@ import { toast } from "sonner";
 export default function AddWordPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const [enhanceVocab, { isLoading: isEnhancing }] = useEnhanceVocabMutation();
+  const [createVocabulary, { isLoading: isSaving }] =
+    useCreateVocabularyMutation();
 
   const [formData, setFormData] = useState<CreateVocabularyPayload>({
     word: "",
@@ -158,12 +160,11 @@ export default function AddWordPage() {
       return;
     }
 
-    setIsSaving(true);
     setSearchError(null);
     setSaveSuccess(false);
 
     try {
-      await api.vocabulary.create(formData);
+      await createVocabulary(formData).unwrap();
       setSaveSuccess(true);
       setDuplicateWarning(null);
       toast.success("Word Added!", {
@@ -198,8 +199,6 @@ export default function AddWordPage() {
       toast.error("Failed to Save", {
         description: errorMsg,
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 

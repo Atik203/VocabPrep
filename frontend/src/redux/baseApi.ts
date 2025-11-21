@@ -5,18 +5,10 @@ import {
   type FetchArgs,
 } from "@reduxjs/toolkit/query/react";
 import { toast } from "sonner";
+import type { RootState } from "./store";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api/v1";
-
-// Helper function to get cookie
-function getCookie(name: string): string | null {
-  if (typeof window === "undefined") return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
-  return null;
-}
 
 // Base query with error handling
 const baseQueryWithErrorHandling = async (
@@ -27,9 +19,10 @@ const baseQueryWithErrorHandling = async (
   const baseQuery = fetchBaseQuery({
     baseUrl: API_BASE_URL,
     credentials: "include",
-    prepareHeaders: (headers) => {
+    prepareHeaders: (headers, { getState }) => {
       headers.set("Content-Type", "application/json");
-      const token = getCookie("token");
+      // Get token from Redux state
+      const token = (getState() as RootState).auth.token;
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
@@ -48,8 +41,6 @@ const baseQueryWithErrorHandling = async (
       toast.error("Authentication Required", {
         description: "Please log in to continue.",
       });
-      // Clear invalid token
-      document.cookie = "token=; path=/; max-age=0";
       // Redirect to login after a short delay
       setTimeout(() => {
         if (

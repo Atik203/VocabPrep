@@ -17,6 +17,7 @@ interface EnhanceVocabResult {
   suggestedTopicTags: string[];
   memoryTip: string;
   synonyms: string[];
+  antonyms: string[];
   tokensUsed: number;
 }
 
@@ -55,6 +56,7 @@ Provide a JSON response with:
 4. suggestedTopicTags: Select 3-5 most relevant tags from this list: ["Education", "Culture", "Technology & Innovation", "Business & Management", "Finance & Banking", "Travel & Tourism", "Food & Nutrition", "Sports & Fitness", "Health & Medicine", "Environment", "Politics & Government", "Art & Creativity", "Literature", "Music", "Science & Research", "Emotions", "Daily Life", "Academic Word List (AWL)", "Idioms & Phrasal Verbs", "High-Frequency IELTS", "High-Frequency GRE"]
 5. memoryTip: Create a creative mnemonic or memory technique to remember this word
 6. synonyms: List 4-6 common synonyms
+7. antonyms: List 3-5 common antonyms (opposite meaning words)
 
 Format as valid JSON only, no markdown.`;
 
@@ -83,6 +85,9 @@ Format as valid JSON only, no markdown.`;
       memoryTip: aiData.memoryTip || "",
       synonyms: Array.isArray(aiData.synonyms)
         ? aiData.synonyms.slice(0, 6)
+        : [],
+      antonyms: Array.isArray(aiData.antonyms)
+        ? aiData.antonyms.slice(0, 5)
         : [],
       tokensUsed: response.tokensUsed,
     };
