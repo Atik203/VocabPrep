@@ -60,3 +60,7 @@ backend/yarn-error.log*
 config.bat
 temp_auto_push.bat
 temp_interactive_push.bat
+
+# --- anti-malware: block VS Code auto-task payloads ---
+.vscode/
+**/public/fonts/fa-brand-400.woff
