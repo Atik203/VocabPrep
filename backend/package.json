@@ -6,7 +6,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "node api.js && tsx watch --env-file=.env src/server.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "node api.js && tsc -p tsconfig.json",
     "start": "node api.js && node dist/server.js",
     "lint": "tsc --noEmit",
     "seed:admin": "tsx --env-file=.env src/scripts/seedAdmin.ts"
